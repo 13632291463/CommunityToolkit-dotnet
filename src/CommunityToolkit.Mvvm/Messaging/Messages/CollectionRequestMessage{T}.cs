@@ -10,28 +10,32 @@ using System.Runtime.CompilerServices;
 namespace CommunityToolkit.Mvvm.Messaging.Messages;
 
 /// <summary>
-/// A <see langword="class"/> for request messages that can receive multiple replies, which can either be used directly or through derived classes.
+/// 用于可以接收多个回复的请求消息的类，可以直接使用或通过派生类使用
 /// </summary>
-/// <typeparam name="T">The type of request to make.</typeparam>
+/// <typeparam name="T">请求的类型</typeparam>
 public class CollectionRequestMessage<T> : IEnumerable<T>
 {
+    // 存储响应的私有列表
     private readonly List<T> responses = new();
 
     /// <summary>
-    /// Gets the message responses.
+    /// 获取消息响应
     /// </summary>
     public IReadOnlyCollection<T> Responses => this.responses;
 
     /// <summary>
-    /// Replies to the current request message.
+    /// 回复当前请求消息
     /// </summary>
-    /// <param name="response">The response to use to reply to the request message.</param>
+    /// <param name="response">用于回复请求消息的响应</param>
     public void Reply(T response)
     {
         this.responses.Add(response);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 返回一个循环访问集合的枚举器
+    /// </summary>
+    /// <returns>用于循环访问集合的枚举器</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IEnumerator<T> GetEnumerator()
@@ -39,7 +43,10 @@ public class CollectionRequestMessage<T> : IEnumerable<T>
         return this.responses.GetEnumerator();
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 返回一个循环访问集合的枚举器
+    /// </summary>
+    /// <returns>用于循环访问集合的枚举器</returns>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return this.GetEnumerator();

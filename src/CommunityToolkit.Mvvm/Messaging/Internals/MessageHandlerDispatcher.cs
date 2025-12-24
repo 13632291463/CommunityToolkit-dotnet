@@ -7,47 +7,49 @@ using System.Runtime.CompilerServices;
 namespace CommunityToolkit.Mvvm.Messaging.Internals;
 
 /// <summary>
-/// A dispatcher type that invokes a given <see cref="MessageHandler{TRecipient, TMessage}"/> callback.
+/// 调用给定 <see cref="MessageHandler{TRecipient, TMessage}"/> 回调的调度器类型
 /// </summary>
 /// <remarks>
-/// This type is used to avoid type aliasing with <see cref="Unsafe.As{T}(object)"/> when the generic
-/// arguments are not known. Additionally, this is an abstract class and not an interface so that when
-/// <see cref="Invoke(object, object)"/> is called, virtual dispatch will be used instead of interface
-/// stub dispatch, which is much slower and with more indirections.
+/// 此类型用于在泛型参数未知时避免与 <see cref="Unsafe.As{T}(object)"/> 的类型别名问题。此外，这是一个抽象类而不是接口，
+/// 因此当调用 <see cref="Invoke(object, object)"/> 时，将使用虚拟调度而不是接口存根调度，虚拟调度速度更快，间接层级更少
 /// </remarks>
 internal abstract class MessageHandlerDispatcher
 {
     /// <summary>
-    /// Invokes the current callback on a target recipient, with a specified message.
+    /// 在目标接收者上调用当前回调，并传入指定的消息
     /// </summary>
-    /// <param name="recipient">The target recipient for the message.</param>
-    /// <param name="message">The message being broadcast.</param>
+    /// <param name="recipient">消息的目标接收者</param>
+    /// <param name="message">正在广播的消息</param>
     public abstract void Invoke(object recipient, object message);
 
     /// <summary>
-    /// A generic version of <see cref="MessageHandlerDispatcher"/>.
+    /// <see cref="MessageHandlerDispatcher"/> 的泛型版本
     /// </summary>
-    /// <typeparam name="TRecipient">The type of recipient for the message.</typeparam>
-    /// <typeparam name="TMessage">The type of message to receive.</typeparam>
+    /// <typeparam name="TRecipient">消息接收者的类型</typeparam>
+    /// <typeparam name="TMessage">要接收的消息类型</typeparam>
     public sealed class For<TRecipient, TMessage> : MessageHandlerDispatcher
         where TRecipient : class
         where TMessage : class
     {
         /// <summary>
-        /// The underlying <see cref="MessageHandler{TRecipient, TMessage}"/> callback to invoke.
+        /// 要调用的基础 <see cref="MessageHandler{TRecipient, TMessage}"/> 回调
         /// </summary>
         private readonly MessageHandler<TRecipient, TMessage> handler;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="For{TRecipient, TMessage}"/> class.
+        /// 初始化 <see cref="For{TRecipient, TMessage}"/> 类的新实例
         /// </summary>
-        /// <param name="handler">The input <see cref="MessageHandler{TRecipient, TMessage}"/> instance.</param>
+        /// <param name="handler">输入的 <see cref="MessageHandler{TRecipient, TMessage}"/> 实例</param>
         public For(MessageHandler<TRecipient, TMessage> handler)
         {
             this.handler = handler;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 使用指定的接收者和消息调用消息处理器
+        /// </summary>
+        /// <param name="recipient">消息的目标接收者</param>
+        /// <param name="message">要处理的消息</param>
         public override void Invoke(object recipient, object message)
         {
             this.handler(Unsafe.As<TRecipient>(recipient), Unsafe.As<TMessage>(message));

@@ -125,28 +125,31 @@ public interface IMessenger
         where TToken : IEquatable<TToken>;
 
     /// <summary>
-    /// Sends a message of the specified type to all registered recipients.
+    /// 向所有已注册的接收者发送指定类型的消息。
     /// </summary>
-    /// <typeparam name="TMessage">The type of message to send.</typeparam>
-    /// <typeparam name="TToken">The type of token to identify what channel to use to send the message.</typeparam>
-    /// <param name="message">The message to send.</param>
-    /// <param name="token">The token indicating what channel to use.</param>
-    /// <returns>The message that was sent (ie. <paramref name="message"/>).</returns>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="message"/> or <paramref name="token"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TMessage">要发送的消息类型。</typeparam>
+    /// <typeparam name="TToken">用于标识使用哪个通道发送消息的令牌类型。</typeparam>
+    /// <param name="message">要发送的消息。</param>
+    /// <param name="token">指示要使用哪个通道的令牌。</param>
+    /// <returns>发送的消息（即 <paramref name="message"/>）。</returns>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="message"/> 或 <paramref name="token"/> 为 <see langword="null"/> 时抛出。</exception>
     TMessage Send<TMessage, TToken>(TMessage message, TToken token)
         where TMessage : class
         where TToken : IEquatable<TToken>;
 
     /// <summary>
-    /// Performs a cleanup on the current messenger.
-    /// Invoking this method does not unregister any of the currently registered
-    /// recipient, and it can be used to perform cleanup operations such as
-    /// trimming the internal data structures of a messenger implementation.
+    /// 对当前消息传递器执行清理操作
     /// </summary>
+    /// <remarks>
+    /// 调用此方法不会注销任何当前已注册的接收者。
+    /// 此方法可用于执行清理操作，例如修剪消息传递器实现的内部数据结构。
+    /// </remarks>
     void Cleanup();
 
     /// <summary>
-    /// Resets the <see cref="IMessenger"/> instance and unregisters all the existing recipients.
+    /// 重置 <see cref="IMessenger"/> 实例并注销所有已注册的接收者。
+    /// 此方法会清除所有已注册的消息订阅者，使信使恢复到初始状态。
     /// </summary>
+    /// <returns>无返回值</returns>
     void Reset();
 }

@@ -12,21 +12,19 @@ using System.Runtime.CompilerServices;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// A generic command whose sole purpose is to relay its functionality to other
-/// objects by invoking delegates. The default return value for the CanExecute
-/// method is <see langword="true"/>. This class allows you to accept command parameters
-/// in the <see cref="Execute(T)"/> and <see cref="CanExecute(T)"/> callback methods.
+/// 一个泛型命令，其唯一目的是通过调用委托将功能传递给其他对象。
+/// CanExecute 方法的默认返回值为 <see langword="true"/>。此类允许您在 Execute(T) 和 CanExecute(T) 回调方法中接受命令参数
 /// </summary>
-/// <typeparam name="T">The type of parameter being passed as input to the callbacks.</typeparam>
+/// <typeparam name="T">作为输入传递给回调的参数类型</typeparam>
 public sealed partial class RelayCommand<T> : IRelayCommand<T>
 {
     /// <summary>
-    /// The <see cref="Action"/> to invoke when <see cref="Execute(T)"/> is used.
+    /// 当调用 Execute(T) 时要调用的 <see cref="Action"/>
     /// </summary>
     private readonly Action<T?> execute;
 
     /// <summary>
-    /// The optional action to invoke when <see cref="CanExecute(T)"/> is used.
+    /// 调用 CanExecute(T) 时可选的调用操作
     /// </summary>
     private readonly Predicate<T?>? canExecute;
 
@@ -34,15 +32,14 @@ public sealed partial class RelayCommand<T> : IRelayCommand<T>
     public event EventHandler? CanExecuteChanged;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RelayCommand{T}"/> class that can always execute.
+    /// 初始化 <see cref="RelayCommand{T}"/> 类的新实例，该实例始终可以执行
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
+    /// <param name="execute">执行逻辑</param>
     /// <remarks>
-    /// Due to the fact that the <see cref="System.Windows.Input.ICommand"/> interface exposes methods that accept a
-    /// nullable <see cref="object"/> parameter, it is recommended that if <typeparamref name="T"/> is a reference type,
-    /// you should always declare it as nullable, and to always perform checks within <paramref name="execute"/>.
+    /// 由于 <see cref="System.Windows.Input.ICommand"/> 接口公开了接受可空 <see cref="object"/> 参数的方法，
+    /// 因此如果 <typeparamref name="T"/> 是引用类型，建议始终将其声明为可空，并在 <paramref name="execute"/> 中始终执行检查
     /// </remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> is <see langword="null"/>.</exception>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="execute"/> 为 <see langword="null"/> 时抛出</exception>
     public RelayCommand(Action<T?> execute)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -51,12 +48,12 @@ public sealed partial class RelayCommand<T> : IRelayCommand<T>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RelayCommand{T}"/> class.
+    /// 初始化 <see cref="RelayCommand{T}"/> 类的新实例
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
-    /// <param name="canExecute">The execution status logic.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> or <paramref name="canExecute"/> are <see langword="null"/>.</exception>
+    /// <param name="execute">执行逻辑</param>
+    /// <param name="canExecute">执行状态逻辑</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的注释</remarks>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="execute"/> 或 <paramref name="canExecute"/> 为 <see langword="null"/> 时抛出</exception>
     public RelayCommand(Action<T?> execute, Predicate<T?> canExecute)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -66,24 +63,34 @@ public sealed partial class RelayCommand<T> : IRelayCommand<T>
         this.canExecute = canExecute;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 通知命令的可执行状态已更改
+    /// </summary>
     public void NotifyCanExecuteChanged()
     {
         CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 确定此命令是否可执行
+    /// </summary>
+    /// <param name="parameter">命令参数</param>
+    /// <returns>如果命令可执行则返回 true，否则返回 false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanExecute(T? parameter)
     {
         return this.canExecute?.Invoke(parameter) != false;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 确定此命令是否可执行
+    /// </summary>
+    /// <param name="parameter">命令参数</param>
+    /// <returns>如果命令可执行则返回 true，否则返回 false</returns>
     public bool CanExecute(object? parameter)
     {
-        // Special case a null value for a value type argument type.
-        // This ensures that no exceptions are thrown during initialization.
+        // 特殊处理值类型参数类型的空值情况
+        // 这确保在初始化期间不会抛出异常
         if (parameter is null && default(T) is not null)
         {
             return false;
@@ -97,14 +104,20 @@ public sealed partial class RelayCommand<T> : IRelayCommand<T>
         return CanExecute(result);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 执行命令
+    /// </summary>
+    /// <param name="parameter">命令参数</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Execute(T? parameter)
     {
         this.execute(parameter);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 执行命令
+    /// </summary>
+    /// <param name="parameter">命令参数</param>
     public void Execute(object? parameter)
     {
         if (!TryGetCommandArgument(parameter, out T? result))
@@ -116,16 +129,16 @@ public sealed partial class RelayCommand<T> : IRelayCommand<T>
     }
 
     /// <summary>
-    /// Tries to get a command argument of compatible type <typeparamref name="T"/> from an input <see cref="object"/>.
+    /// 尝试从输入对象获取兼容类型 T 的命令参数
     /// </summary>
-    /// <param name="parameter">The input parameter.</param>
-    /// <param name="result">The resulting <typeparamref name="T"/> value, if any.</param>
-    /// <returns>Whether or not a compatible command argument could be retrieved.</returns>
+    /// <param name="parameter">输入参数</param>
+    /// <param name="result">结果 T 值（如果存在）</param>
+    /// <returns>是否可以检索到兼容的命令参数</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool TryGetCommandArgument(object? parameter, out T? result)
     {
-        // If the argument is null and the default value of T is also null, then the
-        // argument is valid. T might be a reference type or a nullable value type.
+        // 如果参数为空且 T 的默认值也为 null，则参数有效
+        // T 可能是引用类型或可空值类型
         if (parameter is null && default(T) is null)
         {
             result = default;
@@ -133,9 +146,8 @@ public sealed partial class RelayCommand<T> : IRelayCommand<T>
             return true;
         }
 
-        // Check if the argument is a T value, so either an instance of a type or a derived
-        // type of T is a reference type, an interface implementation if T is an interface,
-        // or a boxed value type in case T was a value type.
+        // 检查参数是否为 T 值，所以 T 是引用类型时可能是类型的实例或派生类型，
+        // 如果 T 是接口则是接口实现，如果 T 是值类型则可能是装箱的值类型
         if (parameter is T argument)
         {
             result = argument;
@@ -149,21 +161,28 @@ public sealed partial class RelayCommand<T> : IRelayCommand<T>
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentException"/> if an invalid command argument is used.
+    /// 当使用无效的命令参数时抛出 <see cref="ArgumentException"/> 异常
     /// </summary>
-    /// <param name="parameter">The input parameter.</param>
-    /// <exception cref="ArgumentException">Thrown with an error message to give info on the invalid parameter.</exception>
+    /// <param name="parameter">输入参数</param>
+    /// <exception cref="ArgumentException">在参数无效时抛出异常，提供有关无效参数的信息</exception>
     [DoesNotReturn]
     internal static void ThrowArgumentExceptionForInvalidCommandArgument(object? parameter)
     {
+        /// <summary>
+        /// 获取与无效参数相关的异常
+        /// </summary>
+        /// <param name="parameter">输入参数</param>
+        /// <returns>ArgumentException 异常实例</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
         static Exception GetException(object? parameter)
         {
             if (parameter is null)
             {
+                // 当参数为空时创建异常消息
                 return new ArgumentException($"Parameter \"{nameof(parameter)}\" (object) must not be null, as the command type requires an argument of type {typeof(T)}.", nameof(parameter));
             }
 
+            // 当参数类型不匹配时创建异常消息
             return new ArgumentException($"Parameter \"{nameof(parameter)}\" (object) cannot be of type {parameter.GetType()}, as the command type requires an argument of type {typeof(T)}.", nameof(parameter));
         }
 

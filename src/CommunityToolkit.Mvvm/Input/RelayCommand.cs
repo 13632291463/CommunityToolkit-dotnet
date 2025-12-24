@@ -11,20 +11,19 @@ using System.Runtime.CompilerServices;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// A command whose sole purpose is to relay its functionality to other
-/// objects by invoking delegates. The default return value for the <see cref="CanExecute"/>
-/// method is <see langword="true"/>. This type does not allow you to accept command parameters
-/// in the <see cref="Execute"/> and <see cref="CanExecute"/> callback methods.
+/// 一个命令，其唯一目的是通过调用委托将功能传递给其他对象。
+/// <see cref="CanExecute"/> 方法的默认返回值为 <see langword="true"/>。 
+/// 此类型不允许您在 <see cref="Execute"/> 和 <see cref="CanExecute"/> 回调方法中接受命令参数。
 /// </summary>
 public sealed partial class RelayCommand : IRelayCommand
 {
     /// <summary>
-    /// The <see cref="Action"/> to invoke when <see cref="Execute"/> is used.
+    /// 当使用 <see cref="Execute"/> 时要调用的 <see cref="Action"/>。
     /// </summary>
     private readonly Action execute;
 
     /// <summary>
-    /// The optional action to invoke when <see cref="CanExecute"/> is used.
+    /// 当使用 <see cref="CanExecute"/> 时要调用的可选操作。
     /// </summary>
     private readonly Func<bool>? canExecute;
 
@@ -32,10 +31,10 @@ public sealed partial class RelayCommand : IRelayCommand
     public event EventHandler? CanExecuteChanged;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RelayCommand"/> class that can always execute.
+    /// 初始化一个可以始终执行的 <see cref="RelayCommand"/> 类的新实例。
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> is <see langword="null"/>.</exception>
+    /// <param name="execute">执行逻辑。</param>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="execute"/> 为 <see langword="null"/> 则抛出异常。</exception>
     public RelayCommand(Action execute)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -44,11 +43,11 @@ public sealed partial class RelayCommand : IRelayCommand
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RelayCommand"/> class.
+    /// 初始化 <see cref="RelayCommand"/> 类的新实例。
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
-    /// <param name="canExecute">The execution status logic.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> or <paramref name="canExecute"/> are <see langword="null"/>.</exception>
+    /// <param name="execute">执行逻辑。</param>
+    /// <param name="canExecute">执行状态逻辑。</param>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="execute"/> 或 <paramref name="canExecute"/> 为 <see langword="null"/> 则抛出异常。</exception>
     public RelayCommand(Action execute, Func<bool> canExecute)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -58,20 +57,29 @@ public sealed partial class RelayCommand : IRelayCommand
         this.canExecute = canExecute;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 通知命令执行状态已更改，触发 CanExecuteChanged 事件
+    /// </summary>
     public void NotifyCanExecuteChanged()
     {
         CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 确定此命令是否可以执行
+    /// </summary>
+    /// <param name="parameter">命令参数</param>
+    /// <returns>如果命令可以执行则返回 true，否则返回 false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanExecute(object? parameter)
     {
         return this.canExecute?.Invoke() != false;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 执行命令逻辑
+    /// </summary>
+    /// <param name="parameter">命令参数</param>
     public void Execute(object? parameter)
     {
         this.execute();

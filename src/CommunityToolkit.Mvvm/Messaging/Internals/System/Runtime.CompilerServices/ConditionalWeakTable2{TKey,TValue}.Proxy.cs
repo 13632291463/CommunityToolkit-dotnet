@@ -10,44 +10,66 @@ using System.Diagnostics.CodeAnalysis;
 namespace System.Runtime.CompilerServices;
 
 /// <summary>
-/// A wrapper for <see cref="ConditionalWeakTable{TKey,TValue}"/> with a custom enumerator.
+/// 一个包装 <see cref="ConditionalWeakTable{TKey,TValue}"/> 并提供自定义枚举器的类。
 /// </summary>
-/// <typeparam name="TKey">Tke key of items to store in the table.</typeparam>
-/// <typeparam name="TValue">The values to store in the table.</typeparam>
+/// <typeparam name="TKey">存储在表中的键的类型。</typeparam>
+/// <typeparam name="TValue">存储在表中的值的类型。</typeparam>
 internal sealed class ConditionalWeakTable2<TKey, TValue>
     where TKey : class
     where TValue : class?
 {
     /// <summary>
-    /// The underlying <see cref="ConditionalWeakTable{TKey,TValue}"/> instance.
+    /// 底层的 <see cref="ConditionalWeakTable{TKey,TValue}"/> 实例。
     /// </summary>
     private readonly ConditionalWeakTable<TKey, TValue> table = new();
 
-    /// <inheritdoc cref="ConditionalWeakTable{TKey,TValue}.TryGetValue"/>
+    /// <summary>
+    /// 获取与指定键关联的值。
+    /// </summary>
+    /// <param name="key">要获取其值的键。</param>
+    /// <param name="value">当此方法返回时，如果找到键，则包含与指定键关联的值；否则为 null。</param>
+    /// <returns>如果 <see cref="ConditionalWeakTable{TKey,TValue}"/> 包含具有指定键的元素，则为 true；否则为 false。</returns>
     public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
     {
         return this.table.TryGetValue(key, out value);
     }
 
-    /// <inheritdoc cref="ConditionalWeakTableExtensions.TryAdd{TKey, TValue}(ConditionalWeakTable{TKey, TValue}, TKey, TValue)"/>
+    /// <summary>
+    /// 尝试将指定的键和值添加到表中。
+    /// </summary>
+    /// <param name="key">要添加的键。</param>
+    /// <param name="value">要添加的值。</param>
+    /// <returns>如果键值对成功添加到表中，则为 true；如果键已存在，则为 false。</returns>
     public bool TryAdd(TKey key, TValue value)
     {
         return this.table.TryAdd(key, value);
     }
 
-    /// <inheritdoc cref="ConditionalWeakTable{TKey,TValue}.GetValue"/>
+    /// <summary>
+    /// 获取与指定键关联的值，如果键不存在，则创建并添加新值。
+    /// </summary>
+    /// <param name="key">要获取值的键</param>
+    /// <param name="createValueCallback">当键不存在时用于创建新值的回调函数</param>
+    /// <returns>与指定键关联的值</returns>
     public TValue GetValue(TKey key, ConditionalWeakTable<TKey, TValue>.CreateValueCallback createValueCallback)
     {
         return this.table.GetValue(key, createValueCallback);
     }
 
-    /// <inheritdoc cref="ConditionalWeakTable{TKey,TValue}.Remove"/>
+    /// <summary>
+    /// 从表中移除指定键及其关联的值。
+    /// </summary>
+    /// <param name="key">要移除的键</param>
+    /// <returns>如果成功移除键值对则返回true，否则返回false</returns>
     public bool Remove(TKey key)
     {
         return this.table.Remove(key);
     }
 
-    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
+    /// <summary>
+    /// 获取枚举器，用于遍历ConditionalWeakTable2中的键值对。
+    /// </summary>
+    /// <returns>ConditionalWeakTable2的枚举器</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Enumerator GetEnumerator() => new(this);
 
@@ -57,14 +79,14 @@ internal sealed class ConditionalWeakTable2<TKey, TValue>
     public ref struct Enumerator
     {
         /// <summary>
-        /// The wrapped <see cref="IEnumerator{T}"/> instance for the enumerator.
+        /// 枚举器包装的 <see cref="IEnumerator{T}"/> 实例。
         /// </summary>
         private readonly IEnumerator<KeyValuePair<TKey, TValue>> enumerator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Enumerator"/> struct.
+        /// 初始化 <see cref="Enumerator"/> 结构的新实例。
         /// </summary>
-        /// <param name="owner">The owner <see cref="ConditionalWeakTable2{TKey, TValue}"/> instance for the enumerator.</param>
+        /// <param name="owner">枚举器所属的 <see cref="ConditionalWeakTable2{TKey, TValue}"/> 实例。</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator(ConditionalWeakTable2<TKey, TValue> owner)
         {
@@ -84,8 +106,9 @@ internal sealed class ConditionalWeakTable2<TKey, TValue>
         }
 
         /// <summary>
-        /// Gets the current key.
+        /// 获取当前枚举位置的键。
         /// </summary>
+        /// <returns>当前键</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly TKey GetKey()
         {
@@ -93,8 +116,9 @@ internal sealed class ConditionalWeakTable2<TKey, TValue>
         }
 
         /// <summary>
-        /// Gets the current value.
+        /// 获取当前枚举位置的值。
         /// </summary>
+        /// <returns>当前值</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly TValue GetValue()
         {

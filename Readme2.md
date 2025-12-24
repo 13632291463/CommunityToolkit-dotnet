@@ -1,3 +1,10 @@
+```
+当前 Visual Studio 版本不支持面向 .NET 10.0。请面向 .NET 9.0 或更低版本，或者使用 Visual Studio 17.16 或更高版本
+/langversion 的选项“14.0”无效。使用 "/langversion:?" 列出支持的值。
+```
+
+
+
 
 
 ```

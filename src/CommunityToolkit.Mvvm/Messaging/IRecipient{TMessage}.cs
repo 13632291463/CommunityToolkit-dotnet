@@ -12,8 +12,9 @@ public interface IRecipient<in TMessage>
     where TMessage : class
 {
     /// <summary>
-    /// Receives a given <typeparamref name="TMessage"/> message instance.
+    /// 接收指定类型 <typeparamref name="TMessage"/> 的消息实例
     /// </summary>
-    /// <param name="message">The message being received.</param>
+    /// <typeparam name="TMessage">要接收的消息类型</typeparam>
+    /// <param name="message">正在接收的消息实例</param>
     void Receive(TMessage message);
 }

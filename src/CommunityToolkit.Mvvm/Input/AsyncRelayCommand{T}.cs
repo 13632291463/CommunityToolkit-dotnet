@@ -15,33 +15,33 @@ using CommunityToolkit.Mvvm.Input.Internals;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// A generic command that provides a more specific version of <see cref="AsyncRelayCommand"/>.
+/// 一个泛型命令，提供 <see cref="AsyncRelayCommand"/> 的更具体的版本。
 /// </summary>
-/// <typeparam name="T">The type of parameter being passed as input to the callbacks.</typeparam>
+/// <typeparam name="T">作为输入传递给回调的参数类型。</typeparam>
 public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICancellationAwareCommand
 {
     /// <summary>
-    /// The <see cref="Func{TResult}"/> to invoke when <see cref="Execute(T)"/> is used.
+    /// 当使用 <see cref="Execute(T)"/> 时要调用的 <see cref="Func{TResult}"/>。
     /// </summary>
     private readonly Func<T?, Task>? execute;
 
     /// <summary>
-    /// The cancelable <see cref="Func{T1,T2,TResult}"/> to invoke when <see cref="Execute(object?)"/> is used.
+    /// 当使用 <see cref="Execute(object?)"/> 时要调用的可取消 <see cref="Func{T1,T2,TResult}"/>。
     /// </summary>
     private readonly Func<T?, CancellationToken, Task>? cancelableExecute;
 
     /// <summary>
-    /// The optional action to invoke when <see cref="CanExecute(T)"/> is used.
+    /// 当使用 <see cref="CanExecute(T)"/> 时要调用的可选操作。
     /// </summary>
     private readonly Predicate<T?>? canExecute;
 
     /// <summary>
-    /// The options being set for the current command.
+    /// 当前命令设置的选项。
     /// </summary>
     private readonly AsyncRelayCommandOptions options;
 
     /// <summary>
-    /// The <see cref="CancellationTokenSource"/> instance to use to cancel <see cref="cancelableExecute"/>.
+    /// 用于取消 <see cref="cancelableExecute"/> 的 <see cref="CancellationTokenSource"/> 实例。
     /// </summary>
     private CancellationTokenSource? cancellationTokenSource;
 
@@ -52,11 +52,11 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     public event EventHandler? CanExecuteChanged;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> is <see langword="null"/>.</exception>
+    /// <param name="execute">执行逻辑。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="execute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, Task> execute)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -65,12 +65,12 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
-    /// <param name="options">The options to use to configure the async command.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> is <see langword="null"/>.</exception>
+    /// <param name="execute">执行逻辑。</param>
+    /// <param name="options">用于配置异步命令的选项。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="execute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, Task> execute, AsyncRelayCommandOptions options)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -80,11 +80,11 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="cancelableExecute">The cancelable execution logic.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="cancelableExecute"/> is <see langword="null"/>.</exception>
+    /// <param name="cancelableExecute">可取消的执行逻辑。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="cancelableExecute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, CancellationToken, Task> cancelableExecute)
     {
         ArgumentNullException.ThrowIfNull(cancelableExecute);
@@ -93,12 +93,12 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="cancelableExecute">The cancelable execution logic.</param>
-    /// <param name="options">The options to use to configure the async command.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="cancelableExecute"/> is <see langword="null"/>.</exception>
+    /// <param name="cancelableExecute">可取消的执行逻辑。</param>
+    /// <param name="options">用于配置异步命令的选项。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="cancelableExecute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, CancellationToken, Task> cancelableExecute, AsyncRelayCommandOptions options)
     {
         ArgumentNullException.ThrowIfNull(cancelableExecute);
@@ -108,12 +108,12 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
-    /// <param name="canExecute">The execution status logic.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> or <paramref name="canExecute"/> are <see langword="null"/>.</exception>
+    /// <param name="execute">执行逻辑。</param>
+    /// <param name="canExecute">执行状态逻辑。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="execute"/> 或 <paramref name="canExecute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, Task> execute, Predicate<T?> canExecute)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -124,13 +124,13 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="execute">The execution logic.</param>
-    /// <param name="canExecute">The execution status logic.</param>
-    /// <param name="options">The options to use to configure the async command.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="execute"/> or <paramref name="canExecute"/> are <see langword="null"/>.</exception>
+    /// <param name="execute">执行逻辑。</param>
+    /// <param name="canExecute">执行状态逻辑。</param>
+    /// <param name="options">用于配置异步命令的选项。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="execute"/> 或 <paramref name="canExecute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, Task> execute, Predicate<T?> canExecute, AsyncRelayCommandOptions options)
     {
         ArgumentNullException.ThrowIfNull(execute);
@@ -142,12 +142,12 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="cancelableExecute">The cancelable execution logic.</param>
-    /// <param name="canExecute">The execution status logic.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="cancelableExecute"/> or <paramref name="canExecute"/> are <see langword="null"/>.</exception>
+    /// <param name="cancelableExecute">可取消的执行逻辑。</param>
+    /// <param name="canExecute">执行状态逻辑。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="cancelableExecute"/> 或 <paramref name="canExecute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, CancellationToken, Task> cancelableExecute, Predicate<T?> canExecute)
     {
         ArgumentNullException.ThrowIfNull(cancelableExecute);
@@ -158,13 +158,13 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncRelayCommand{T}"/> class.
+    /// 初始化 <see cref="AsyncRelayCommand{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="cancelableExecute">The cancelable execution logic.</param>
-    /// <param name="canExecute">The execution status logic.</param>
-    /// <param name="options">The options to use to configure the async command.</param>
-    /// <remarks>See notes in <see cref="RelayCommand{T}(Action{T})"/>.</remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="cancelableExecute"/> or <paramref name="canExecute"/> are <see langword="null"/>.</exception>
+    /// <param name="cancelableExecute">可取消的执行逻辑。</param>
+    /// <param name="canExecute">执行状态逻辑。</param>
+    /// <param name="options">用于配置异步命令的选项。</param>
+    /// <remarks>参见 <see cref="RelayCommand{T}(Action{T})"/> 中的说明。</remarks>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="cancelableExecute"/> 或 <paramref name="canExecute"/> 为 <see langword="null"/> 则抛出。</exception>
     public AsyncRelayCommand(Func<T?, CancellationToken, Task> cancelableExecute, Predicate<T?> canExecute, AsyncRelayCommandOptions options)
     {
         ArgumentNullException.ThrowIfNull(cancelableExecute);
@@ -177,7 +177,9 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
 
     private Task? executionTask;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取或设置当前执行的任务
+    /// </summary>
     public Task? ExecutionTask
     {
         get => this.executionTask;
@@ -206,6 +208,7 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
                 return;
             }
 
+            // 监视任务完成情况并更新相关属性
             static async void MonitorTask(AsyncRelayCommand<T> @this, Task task)
             {
                 await task.GetAwaitableWithoutEndValidation();
@@ -231,25 +234,39 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取一个值，指示命令是否可以被取消
+    /// </summary>
     public bool CanBeCanceled => IsRunning && this.cancellationTokenSource is { IsCancellationRequested: false };
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取一个值，指示是否已请求取消
+    /// </summary>
     public bool IsCancellationRequested => this.cancellationTokenSource is { IsCancellationRequested: true };
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取一个值，指示命令是否正在运行
+    /// </summary>
     public bool IsRunning => ExecutionTask is { IsCompleted: false };
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取一个值，指示命令是否支持取消
+    /// </summary>
     bool ICancellationAwareCommand.IsCancellationSupported => this.execute is null;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 通知命令管理器该命令的可执行状态可能已更改
+    /// </summary>
     public void NotifyCanExecuteChanged()
     {
         CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 确定在指定状态参数的情况下，此命令是否可以执行
+    /// </summary>
+    /// <param name="parameter">用于确定命令是否可以执行的参数</param>
+    /// <returns>如果可以执行此命令，则为 true；否则为 false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanExecute(T? parameter)
     {
@@ -258,11 +275,15 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
         return canExecute && ((this.options & AsyncRelayCommandOptions.AllowConcurrentExecutions) != 0 || ExecutionTask is not { IsCompleted: false });
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 确定在指定状态参数的情况下，此命令是否可以执行
+    /// </summary>
+    /// <param name="parameter">用于确定命令是否可以执行的参数</param>
+    /// <returns>如果可以执行此命令，则为 true；否则为 false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanExecute(object? parameter)
     {
-        // Special case, see RelayCommand<T>.CanExecute(object?) for more info
+        // 特殊情况处理，参见 RelayCommand<T>.CanExecute(object?) 了解更多信息
         if (parameter is null && default(T) is not null)
         {
             return false;
@@ -276,7 +297,10 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
         return CanExecute(result);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 对其可执行性委托传递的参数执行与命令关联的逻辑
+    /// </summary>
+    /// <param name="parameter">命令使用的数据。如果命令不需要传递数据，则可以将此对象设置为 null</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Execute(T? parameter)
     {
@@ -288,7 +312,10 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 对其可执行性委托传递的参数执行与命令关联的逻辑
+    /// </summary>
+    /// <param name="parameter">命令使用的数据。如果命令不需要传递数据，则可以将此对象设置为 null</param>
     public void Execute(object? parameter)
     {
         if (!RelayCommand<T>.TryGetCommandArgument(parameter, out T? result))
@@ -299,28 +326,32 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
         Execute(result);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 异步执行与命令关联的逻辑
+    /// </summary>
+    /// <param name="parameter">命令使用的数据。如果命令不需要传递数据，则可以将此对象设置为 null</param>
+    /// <returns>表示异步操作的任务</returns>
     public Task ExecuteAsync(T? parameter)
     {
         Task executionTask;
 
         if (this.execute is not null)
         {
-            // Non cancelable command delegate
+            // 非可取消命令委托
             executionTask = ExecutionTask = this.execute(parameter);
         }
         else
         {
-            // Cancel the previous operation, if one is pending
+            // 取消之前的操作（如果存在待处理操作）
             this.cancellationTokenSource?.Cancel();
 
             CancellationTokenSource cancellationTokenSource = this.cancellationTokenSource = new();
 
-            // Invoke the cancelable command delegate with a new linked token
+            // 使用新的链接令牌调用可取消命令委托
             executionTask = ExecutionTask = this.cancelableExecute!(parameter, cancellationTokenSource.Token);
         }
 
-        // If concurrent executions are disabled, notify the can execute change as well
+        // 如果禁用并发执行，则通知可执行性更改
         if ((this.options & AsyncRelayCommandOptions.AllowConcurrentExecutions) == 0)
         {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
@@ -329,7 +360,11 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
         return executionTask;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 异步执行与命令关联的逻辑
+    /// </summary>
+    /// <param name="parameter">命令使用的数据。如果命令不需要传递数据，则可以将此对象设置为 null</param>
+    /// <returns>表示异步操作的任务</returns>
     public Task ExecuteAsync(object? parameter)
     {
         if (!RelayCommand<T>.TryGetCommandArgument(parameter, out T? result))
@@ -340,7 +375,9 @@ public sealed partial class AsyncRelayCommand<T> : IAsyncRelayCommand<T>, ICance
         return ExecuteAsync(result);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 尝试取消当前正在执行的操作
+    /// </summary>
     public void Cancel()
     {
         if (this.cancellationTokenSource is CancellationTokenSource { IsCancellationRequested: false } cancellationTokenSource)

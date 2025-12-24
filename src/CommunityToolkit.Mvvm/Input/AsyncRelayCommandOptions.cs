@@ -7,47 +7,47 @@ using System;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// Options to customize the behavior of <see cref="AsyncRelayCommand"/> and <see cref="AsyncRelayCommand{T}"/> instances.
+/// 用于自定义 <see cref="AsyncRelayCommand"/> 和 <see cref="AsyncRelayCommand{T}"/> 实例行为的选项。
 /// </summary>
 [Flags]
 public enum AsyncRelayCommandOptions
 {
     /// <summary>
-    /// No option is specified. The <see cref="AsyncRelayCommand"/> and <see cref="AsyncRelayCommand{T}"/> types will use their default behavior:
+    /// 未指定选项。<see cref="AsyncRelayCommand"/> 和 <see cref="AsyncRelayCommand{T}"/> 类型将使用其默认行为：
     /// <list type="bullet">
-    ///     <item>Concurrent execution is disallowed: a command is disabled if there is a pending asynchronous execution running.</item>
+    ///     <item>不允许并发执行：如果存在正在运行的异步执行，则命令被禁用。</item>
     ///     <item>
     ///         <para>
-    ///             Exceptions are thrown on the calling context: calling <see cref="AsyncRelayCommand.Execute(object?)"/> will await the
-    ///             returned <see cref="System.Threading.Tasks.Task"/> for the operation, and propagate the exception on the calling context.        
+    ///             异常在调用上下文中抛出：调用 <see cref="AsyncRelayCommand.Execute(object?)"/> 将等待
+    ///             操作返回的 <see cref="System.Threading.Tasks.Task"/>，并在调用上下文中传播异常。
     ///         </para>
-    ///         <para>This behavior is consistent with synchronous commands, where exceptions in <see cref="RelayCommand.Execute(object?)"/> behave the same.</para>
+    ///         <para>此行为与同步命令一致，其中 <see cref="RelayCommand.Execute(object?)"/> 中的异常行为相同。</para>
     ///     </item>
     /// </list>
     /// </summary>
     None = 0,
 
     /// <summary>
-    /// <para>Concurrent executions are allowed. This option makes it so that the same command can be invoked concurrently multiple times.</para>
+    /// <para>允许并发执行。此选项使同一个命令可以同时多次调用。</para>
     /// <para>
-    /// Note that additional considerations should be taken into account in this case:
+    /// 注意，在这种情况下应考虑以下附加事项：
     /// <list type="bullet">
-    ///     <item>If the command supports cancellation, previous invocations will automatically be canceled if a new one is started.</item>
-    ///     <item>The <see cref="AsyncRelayCommand.ExecutionTask"/> property will always represent the operation that was started last.</item>
+    ///     <item>如果命令支持取消，当启动新调用时，先前的调用将自动被取消。</item>
+    ///     <item><see cref="AsyncRelayCommand.ExecutionTask"/> 属性将始终表示最后启动的操作。</item>
     /// </list>
     /// </para>
     /// </summary>
     AllowConcurrentExecutions = 1 << 0,
 
     /// <summary>
-    /// <para>Exceptions are not thrown on the calling context, and are propagated to <see cref="System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/> instead.</para>
+    /// <para>异常不会在调用上下文中抛出，而是传播到 <see cref="System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/>。</para>
     /// <para>
-    /// This affects how calls to <see cref="AsyncRelayCommand.Execute(object?)"/> behave. When this option is used, if an operation fails, that exception will not
-    /// be rethrown on the calling context (as it is not awaited there). Instead, it will flow to <see cref="System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/>.
+    /// 这会影响对 <see cref="AsyncRelayCommand.Execute(object?)"/> 调用的行为。当使用此选项时，如果操作失败，该异常将不会
+    /// 在调用上下文中重新抛出（因为在那里没有等待它）。相反，它将流向 <see cref="System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/>。
     /// </para>
     /// <para>
-    /// This option enables more advanced scenarios, where the <see cref="AsyncRelayCommand.ExecutionTask"/> property can be used to inspect the state of an operation
-    /// that was queued. That is, even if the operation failed or was canceled, the details of that can be retrieved at a later time by accessing this property.
+    /// 此选项启用了更高级的场景，其中可以使用 <see cref="AsyncRelayCommand.ExecutionTask"/> 属性来检查
+    /// 已排队操作的状态。也就是说，即使操作失败或被取消，也可以通过访问此属性在稍后时间检索详细信息。
     /// </para>
     /// </summary>
     FlowExceptionsToTaskScheduler = 1 << 1

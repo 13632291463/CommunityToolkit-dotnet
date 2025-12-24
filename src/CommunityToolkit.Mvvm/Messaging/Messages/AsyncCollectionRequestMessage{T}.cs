@@ -13,70 +13,66 @@ using System.Threading.Tasks;
 namespace CommunityToolkit.Mvvm.Messaging.Messages;
 
 /// <summary>
-/// A <see langword="class"/> for request messages that can receive multiple replies, which can either be used directly or through derived classes.
+/// 一个用于可以接收多个回复的请求消息的类，可以直接使用或通过派生类使用。
 /// </summary>
-/// <typeparam name="T">The type of request to make.</typeparam>
+/// <typeparam name="T">请求的类型。</typeparam>
 public class AsyncCollectionRequestMessage<T> : IAsyncEnumerable<T>
 {
     /// <summary>
-    /// The collection of received replies. We accept both <see cref="Task{TResult}"/> instance, representing already running
-    /// operations that can be executed in parallel, or <see cref="Func{T,TResult}"/> instances, which can be used so that multiple
-    /// asynchronous operations are only started sequentially from <see cref="GetAsyncEnumerator"/> and do not overlap in time.
+    /// 接收到的回复集合。我们接受 <see cref="Task{TResult}"/> 实例，代表已经运行的
+    /// 可以并行执行的操作，或 <see cref="Func{T,TResult}"/> 实例，可用于从 <see cref="GetAsyncEnumerator"/> 
+    /// 中顺序启动多个异步操作，且不会在时间上重叠。
     /// </summary>
     private readonly List<(Task<T>?, Func<CancellationToken, Task<T>>?)> responses = new();
 
     /// <summary>
-    /// The <see cref="CancellationTokenSource"/> instance used to link the token passed to
-    /// <see cref="GetAsyncEnumerator"/> and the one passed to all subscribers to the message.
+    /// 用于将传递给 <see cref="GetAsyncEnumerator"/> 的令牌与传递给消息所有订阅者的令牌链接的
+    /// <see cref="CancellationTokenSource"/> 实例。
     /// </summary>
     private readonly CancellationTokenSource cancellationTokenSource = new();
 
     /// <summary>
-    /// Gets the <see cref="System.Threading.CancellationToken"/> instance that will be linked to the
-    /// one used to asynchronously enumerate the received responses. This can be used to cancel asynchronous
-    /// replies that are still being processed, if no new items are needed from this request message.
-    /// Consider the following example, where we define a message to retrieve the currently opened documents:
+    /// 获取将与异步枚举接收到的响应的令牌链接的 <see cref="System.Threading.CancellationToken"/> 实例。
+    /// 这可用于取消仍在处理的异步回复，如果此请求消息不再需要新项目。
+    /// 请考虑以下示例，我们定义一个消息来检索当前打开的文档：
     /// <code>
     /// public class OpenDocumentsRequestMessage : AsyncCollectionRequestMessage&lt;XmlDocument&gt; { }
     /// </code>
-    /// We can then request and enumerate the results like so:
+    /// 然后我们可以请求并枚举结果，如下所示：
     /// <code>
     /// await foreach (var document in Messenger.Default.Send&lt;OpenDocumentsRequestMessage&gt;())
     /// {
-    ///     // Process each document here...
+    ///     // 在这里处理每个文档...
     /// }
     /// </code>
-    /// If we also want to control the cancellation of the token passed to each subscriber to the message,
-    /// we can do so by passing a token we control to the returned message before starting the enumeration
-    /// (<see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T},CancellationToken)"/>).
-    /// The previous snippet with this additional change looks as follows:
+    /// 如果我们还想控制传递给消息订阅者的令牌，我们可以通过在开始枚举之前向返回的消息传递我们控制的令牌来实现
+    /// (<see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T},CancellationToken)"/>)。
+    /// 带有此额外更改的前面的代码片段如下所示：
     /// <code>
     /// await foreach (var document in Messenger.Default.Send&lt;OpenDocumentsRequestMessage&gt;().WithCancellation(cts.Token))
     /// {
-    ///     // Process each document here...
+    ///     // 在这里处理每个文档...
     /// }
     /// </code>
-    /// When no more new items are needed (or for any other reason depending on the situation), the token
-    /// passed to the enumerator can be canceled (by calling <see cref="CancellationTokenSource.Cancel()"/>),
-    /// and that will also notify the remaining tasks in the request message. The token exposed by the message
-    /// itself will automatically be linked and canceled with the one passed to the enumerator.
+    /// 当不再需要新项目（或根据情况的任何其他原因）时，可以取消传递给枚举器的令牌（通过调用 <see cref="CancellationTokenSource.Cancel()"/>），
+    /// 这也将通知请求消息中的剩余任务。消息本身公开的令牌将自动链接并与传递给枚举器的令牌一起取消。
     /// </summary>
     public CancellationToken CancellationToken => this.cancellationTokenSource.Token;
 
     /// <summary>
-    /// Replies to the current request message.
+    /// 回复当前请求消息。
     /// </summary>
-    /// <param name="response">The response to use to reply to the request message.</param>
+    /// <param name="response">用于回复请求消息的响应。</param>
     public void Reply(T response)
     {
         Reply(Task.FromResult(response));
     }
 
     /// <summary>
-    /// Replies to the current request message.
+    /// 回复当前请求消息。
     /// </summary>
-    /// <param name="response">The response to use to reply to the request message.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="response"/> is <see langword="null"/>.</exception>
+    /// <param name="response">用于回复请求消息的响应。</param>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="response"/> 为 <see langword="null"/> 时抛出。</exception>
     public void Reply(Task<T> response)
     {
         ArgumentNullException.ThrowIfNull(response);
@@ -85,10 +81,10 @@ public class AsyncCollectionRequestMessage<T> : IAsyncEnumerable<T>
     }
 
     /// <summary>
-    /// Replies to the current request message.
+    /// 回复当前请求消息。
     /// </summary>
-    /// <param name="response">The response to use to reply to the request message.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="response"/> is <see langword="null"/>.</exception>
+    /// <param name="response">用于回复请求消息的响应。</param>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="response"/> 为 <see langword="null"/> 时抛出。</exception>
     public void Reply(Func<CancellationToken, Task<T>> response)
     {
         ArgumentNullException.ThrowIfNull(response);
@@ -97,10 +93,10 @@ public class AsyncCollectionRequestMessage<T> : IAsyncEnumerable<T>
     }
 
     /// <summary>
-    /// Gets the collection of received response items.
+    /// 获取接收到的响应项集合。
     /// </summary>
-    /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken"/> value to stop the operation.</param>
-    /// <returns>The collection of received response items.</returns>
+    /// <param name="cancellationToken">用于停止操作的 <see cref="System.Threading.CancellationToken"/> 值。</param>
+    /// <returns>接收到的响应项集合。</returns>
     public async Task<IReadOnlyCollection<T>> GetResponsesAsync(CancellationToken cancellationToken = default)
     {
         if (cancellationToken.CanBeCanceled)
@@ -118,7 +114,11 @@ public class AsyncCollectionRequestMessage<T> : IAsyncEnumerable<T>
         return results;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取异步枚举器以遍历响应集合。
+    /// </summary>
+    /// <param name="cancellationToken">用于控制操作取消的 <see cref="CancellationToken"/>。</param>
+    /// <returns>返回响应集合的异步枚举器。</returns>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public async IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
     {
@@ -127,6 +127,7 @@ public class AsyncCollectionRequestMessage<T> : IAsyncEnumerable<T>
             _ = cancellationToken.Register(this.cancellationTokenSource.Cancel);
         }
 
+        // 遍历所有响应，根据响应类型执行不同的处理
         foreach ((Task<T>? task, Func<CancellationToken, Task<T>>? func) in this.responses)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -134,10 +135,12 @@ public class AsyncCollectionRequestMessage<T> : IAsyncEnumerable<T>
                 yield break;
             }
 
+            // 如果是Task类型的响应，等待其完成
             if (task is not null)
             {
                 yield return await task.ConfigureAwait(false);
             }
+            // 如果是Func类型的响应，使用提供的取消令牌执行函数
             else
             {
                 yield return await func!(cancellationToken).ConfigureAwait(false);

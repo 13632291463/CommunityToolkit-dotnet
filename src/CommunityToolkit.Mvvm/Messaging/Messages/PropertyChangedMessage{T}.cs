@@ -8,19 +8,19 @@
 namespace CommunityToolkit.Mvvm.Messaging.Messages;
 
 /// <summary>
-/// A message used to broadcast property changes in observable objects.
+/// 用于广播 observable 对象中的属性更改的消息。
 /// </summary>
-/// <typeparam name="T">The type of the property to broadcast the change for.</typeparam>
+/// <typeparam name="T">要广播更改的属性类型。</typeparam>
 public class PropertyChangedMessage<T>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PropertyChangedMessage{T}"/> class.
+    /// 初始化 <see cref="PropertyChangedMessage{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="sender">The original sender of the broadcast message.</param>
-    /// <param name="propertyName">The name of the property that changed.</param>
-    /// <param name="oldValue">The value that the property had before the change.</param>
-    /// <param name="newValue">The value that the property has after the change.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="sender"/> is <see langword="null"/>.</exception>
+    /// <param name="sender">广播消息的原始发送者。</param>
+    /// <param name="propertyName">更改的属性名称。</param>
+    /// <param name="oldValue">属性更改前的值。</param>
+    /// <param name="newValue">属性更改后的值。</param>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="sender"/> 为 <see langword="null"/> 时抛出。</exception>
     public PropertyChangedMessage(object sender, string? propertyName, T oldValue, T newValue)
     {
         ArgumentNullException.ThrowIfNull(sender);
@@ -32,22 +32,22 @@ public class PropertyChangedMessage<T>
     }
 
     /// <summary>
-    /// Gets the original sender of the broadcast message.
+    /// 获取广播消息的原始发送者。
     /// </summary>
     public object Sender { get; }
 
     /// <summary>
-    /// Gets the name of the property that changed.
+    /// 获取更改的属性名称。
     /// </summary>
     public string? PropertyName { get; }
 
     /// <summary>
-    /// Gets the value that the property had before the change.
+    /// 获取属性更改前的值。
     /// </summary>
     public T OldValue { get; }
 
     /// <summary>
-    /// Gets the value that the property has after the change.
+    /// 获取属性更改后的值。
     /// </summary>
     public T NewValue { get; }
 }

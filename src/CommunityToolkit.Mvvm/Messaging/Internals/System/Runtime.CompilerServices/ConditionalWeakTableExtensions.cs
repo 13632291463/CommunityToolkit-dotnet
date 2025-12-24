@@ -7,23 +7,24 @@
 namespace System.Runtime.CompilerServices;
 
 /// <summary>
-/// Helper methods for the <see cref="ConditionalWeakTable{TKey, TValue}"/> type.
+/// 为 <see cref="ConditionalWeakTable{TKey, TValue}"/> 类型提供辅助方法的扩展类
 /// </summary>
 internal static class ConditionalWeakTableExtensions
 {
     /// <summary>
-    /// Tries to add a new pair to the table.
+    /// 尝试向表中添加一个新的键值对
     /// </summary>
-    /// <typeparam name="TKey">Tke key of items to store in the table.</typeparam>
-    /// <typeparam name="TValue">The values to store in the table.</typeparam>
-    /// <param name="table">The input <see cref="ConditionalWeakTable{TKey, TValue}"/> instance to modify.</param>
-    /// <param name="key">The key to add.</param>
-    /// <param name="value">The value to associate with key.</param>
+    /// <typeparam name="TKey">表中存储项的键类型</typeparam>
+    /// <typeparam name="TValue">表中存储的值类型</typeparam>
+    /// <param name="table">要修改的输入 <see cref="ConditionalWeakTable{TKey, TValue}"/> 实例</param>
+    /// <param name="key">要添加的键</param>
+    /// <param name="value">要与键关联的值</param>
+    /// <returns>如果键值对成功添加到表中则返回 true，如果键已存在则返回 false</returns>
     public static bool TryAdd<TKey, TValue>(this ConditionalWeakTable<TKey, TValue> table, TKey key, TValue value)
         where TKey : class
         where TValue : class?
     {
-        // There is no way to do this on .NET Standard 2.0 or 2.1 without exception handling
+        // 在 .NET Standard 2.0 或 2.1 上，除了异常处理外没有其他方式实现此功能
         try
         {
             table.Add(key, value);

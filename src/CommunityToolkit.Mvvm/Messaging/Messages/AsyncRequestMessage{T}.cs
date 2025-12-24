@@ -26,6 +26,7 @@ public class AsyncRequestMessage<T>
     {
         get
         {
+            // 检查是否已接收到响应
             if (!HasReceivedResponse)
             {
                 ThrowInvalidOperationExceptionForNoResponseReceived();
@@ -58,8 +59,10 @@ public class AsyncRequestMessage<T>
     /// <exception cref="InvalidOperationException">Thrown if <see cref="Response"/> has already been set.</exception>
     public void Reply(Task<T> response)
     {
+        // 验证响应参数不为null
         ArgumentNullException.ThrowIfNull(response);
 
+        // 检查是否已经设置过响应，防止重复回复
         if (HasReceivedResponse)
         {
             ThrowInvalidOperationExceptionForDuplicateReply();

@@ -7,22 +7,22 @@ using System.Runtime.CompilerServices;
 namespace System.Collections.Generic;
 
 /// <summary>
-/// A helper class for <see cref="Dictionary2{TKey,TValue}"/>.
+/// 用于 Dictionary{TKey,TValue} 的辅助类
 /// </summary>
 internal static class HashHelpers
 {
     /// <summary>
-    /// Maximum prime smaller than the maximum array length.
+    /// 小于最大数组长度的最大质数
     /// </summary>
     private const int MaxPrimeArrayLength = 0x7FFFFFC3;
 
     /// <summary>
-    /// An arbitrary prime factor used in <see cref="GetPrime(int)"/>.
+    /// 在 GetPrime 方法中使用的任意质数因子
     /// </summary>
     private const int HashPrime = 101;
 
     /// <summary>
-    /// Table of prime numbers to use as hash table sizes.
+    /// 用作哈希表大小的质数表
     /// </summary>
     private static readonly int[] primes =
     {
@@ -34,16 +34,19 @@ internal static class HashHelpers
     };
 
     /// <summary>
-    /// Checks whether a value is a prime.
+    /// 检查一个值是否为质数
     /// </summary>
-    /// <param name="candidate">The value to check.</param>
-    /// <returns>Whether or not <paramref name="candidate"/> is a prime.</returns>
+    /// <param name="candidate">要检查的值</param>
+    /// <returns>candidate 是否为质数</returns>
     private static bool IsPrime(int candidate)
     {
+        // 检查候选数是否为奇数
         if ((candidate & 1) != 0)
         {
+            // 计算平方根作为检查的上限
             int limit = (int)Math.Sqrt(candidate);
 
+            // 从3开始，只检查奇数除数
             for (int divisor = 3; divisor <= limit; divisor += 2)
             {
                 if ((candidate % divisor) == 0)
@@ -55,16 +58,18 @@ internal static class HashHelpers
             return true;
         }
 
+        // 唯一的偶数质数是2
         return candidate == 2;
     }
 
     /// <summary>
-    /// Gets the smallest prime bigger than a specified value.
+    /// 获取比指定值大的最小质数
     /// </summary>
-    /// <param name="min">The target minimum value.</param>
-    /// <returns>The new prime that was found.</returns>
+    /// <param name="min">目标最小值</param>
+    /// <returns>找到的新质数</returns>
     public static int GetPrime(int min)
     {
+        // 首先在预定义的质数表中查找
         foreach (int prime in primes)
         {
             if (prime >= min)
@@ -73,8 +78,10 @@ internal static class HashHelpers
             }
         }
 
+        // 如果质数表中没有足够大的质数，则搜索更大的质数
         for (int i = min | 1; i < int.MaxValue; i += 2)
         {
+            // 确保新质数与 HashPrime 相关的特殊条件
             if (IsPrime(i) && ((i - 1) % HashPrime != 0))
             {
                 return i;
@@ -85,14 +92,16 @@ internal static class HashHelpers
     }
 
     /// <summary>
-    /// Returns size of hashtable to grow to.
+    /// 返回哈希表扩展后的大小
     /// </summary>
-    /// <param name="oldSize">The previous table size.</param>
-    /// <returns>The expanded table size.</returns>
+    /// <param name="oldSize">之前的表大小</param>
+    /// <returns>扩展后的表大小</returns>
     public static int ExpandPrime(int oldSize)
     {
+        // 将大小翻倍
         int newSize = 2 * oldSize;
 
+        // 检查是否超过最大质数数组长度
         if ((uint)newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > oldSize)
         {
             return MaxPrimeArrayLength;
@@ -102,21 +111,26 @@ internal static class HashHelpers
     }
 
     /// <summary>
-    /// Returns approximate reciprocal of the divisor: ceil(2**64 / divisor).
+    /// 返回除数的近似倒数: ceil(2**64 / divisor)
     /// </summary>
-    /// <remarks>This should only be used on 64-bit.</remarks>
+    /// <remarks>此方法仅应在64位系统上使用</remarks>
     public static ulong GetFastModMultiplier(uint divisor)
     {
         return ulong.MaxValue / divisor + 1;
     }
 
     /// <summary>
-    /// Performs a mod operation using the multiplier pre-computed with <see cref="GetFastModMultiplier"/>.
+    /// 使用通过 GetFastModMultiplier 预计算的乘数执行模运算
     /// </summary>
-    /// <remarks>This should only be used on 64-bit.</remarks>
+    /// <param name="value">要进行模运算的值</param>
+    /// <param name="divisor">除数</param>
+    /// <param name="multiplier">通过 GetFastModMultiplier 预计算的乘数</param>
+    /// <returns>模运算的结果</returns>
+    /// <remarks>此方法仅应在64位系统上使用</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static uint FastMod(uint value, uint divisor, ulong multiplier)
     {
+        // 使用乘法和位移操作来快速计算模运算
         return (uint)(((((multiplier * value) >> 32) + 1) * divisor) >> 32);
     }
 }
