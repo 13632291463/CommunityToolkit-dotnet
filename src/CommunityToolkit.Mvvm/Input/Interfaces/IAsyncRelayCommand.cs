@@ -8,70 +8,70 @@ using System.Threading.Tasks;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// An interface expanding <see cref="IRelayCommand"/> to support asynchronous operations.
+/// 一个扩展 <see cref="IRelayCommand"/> 的接口，以支持异步操作。
 /// </summary>
 public interface IAsyncRelayCommand : IRelayCommand, INotifyPropertyChanged
 {
     /// <summary>
-    /// Gets the last scheduled <see cref="Task"/>, if available.
-    /// This property notifies a change when the <see cref="Task"/> completes.
+    /// 获取最后调度的 <see cref="Task"/>（如果可用）。
+    /// 此属性在 <see cref="Task"/> 完成时通知更改。
     /// </summary>
     Task? ExecutionTask { get; }
 
     /// <summary>
-    /// Gets a value indicating whether a running operation for this command can currently be canceled.
+    /// 获取一个值，该值指示当前是否可以取消正在运行的操作。
     /// </summary>
     /// <remarks>
-    /// The exact sequence of events that types implementing this interface should raise is as follows:
+    /// 实现此接口的类型应引发的事件的确切序列如下：
     /// <list type="bullet">
     /// <item>
-    /// The command is initially not running: <see cref="IsRunning"/>, <see cref="CanBeCanceled"/>
-    /// and <see cref="IsCancellationRequested"/> are <see langword="false"/>.
+    /// 命令最初未运行：<see cref="IsRunning"/>、<see cref="CanBeCanceled"/>
+    /// 和 <see cref="IsCancellationRequested"/> 为 <see langword="false"/>。
     /// </item>
     /// <item>
-    /// The command starts running: <see cref="IsRunning"/> and <see cref="CanBeCanceled"/> switch to
-    /// <see langword="true"/>. <see cref="IsCancellationRequested"/> is set to <see langword="false"/>.
+    /// 命令开始运行：<see cref="IsRunning"/> 和 <see cref="CanBeCanceled"/> 切换到
+    /// <see langword="true"/>。<see cref="IsCancellationRequested"/> 设置为 <see langword="false"/>。
     /// </item>
     /// <item>
-    /// If the operation is canceled: <see cref="CanBeCanceled"/> switches to <see langword="false"/>
-    /// and <see cref="IsCancellationRequested"/> switches to <see langword="true"/>.
+    /// 如果操作被取消：<see cref="CanBeCanceled"/> 切换到 <see langword="false"/>
+    /// 和 <see cref="IsCancellationRequested"/> 切换到 <see langword="true"/>。
     /// </item>
     /// <item>
-    /// The operation completes: <see cref="IsRunning"/> and <see cref="CanBeCanceled"/> switch
-    /// to <see langword="false"/>. The state of <see cref="IsCancellationRequested"/> is undefined.
+    /// 操作完成：<see cref="IsRunning"/> 和 <see cref="CanBeCanceled"/> 切换
+    /// 到 <see langword="false"/>。<see cref="IsCancellationRequested"/> 的状态未定义。
     /// </item>
     /// </list>
-    /// This only applies if the underlying logic for the command actually supports cancelation. If that is
-    /// not the case, then <see cref="CanBeCanceled"/> and <see cref="IsCancellationRequested"/> will always remain
-    /// <see langword="false"/> regardless of the current state of the command.
+    /// 这仅适用于命令的底层逻辑实际支持取消的情况。如果不是这种情况，
+    /// 则 <see cref="CanBeCanceled"/> 和 <see cref="IsCancellationRequested"/> 将始终保持
+    /// <see langword="false"/>，无论命令的当前状态如何。
     /// </remarks>
     bool CanBeCanceled { get; }
 
     /// <summary>
-    /// Gets a value indicating whether a cancelation request has been issued for the current operation.
+    /// 获取一个值，该值指示是否已为当前操作发出取消请求。
     /// </summary>
     bool IsCancellationRequested { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the command currently has a pending operation being executed.
+    /// 获取一个值，该值指示命令当前是否具有正在执行的待处理操作。
     /// </summary>
     bool IsRunning { get; }
 
     /// <summary>
-    /// Provides a more specific version of <see cref="System.Windows.Input.ICommand.Execute"/>,
-    /// also returning the <see cref="Task"/> representing the async operation being executed.
+    /// 提供 <see cref="System.Windows.Input.ICommand.Execute"/> 的更具体版本，
+    /// 同时返回表示正在执行的异步操作的 <see cref="Task"/>。
     /// </summary>
-    /// <param name="parameter">The input parameter.</param>
-    /// <returns>The <see cref="Task"/> representing the async operation being executed.</returns>
-    /// <exception cref="System.ArgumentException">Thrown if <paramref name="parameter"/> is incompatible with the underlying command implementation.</exception>
+    /// <param name="parameter">输入参数。</param>
+    /// <returns>表示正在执行的异步操作的 <see cref="Task"/>。</returns>
+    /// <exception cref="System.ArgumentException">如果 <paramref name="parameter"/> 与底层命令实现不兼容，则引发此异常。</exception>
     Task ExecuteAsync(object? parameter);
 
     /// <summary>
-    /// Communicates a request for cancelation.
+    /// 发出取消请求。
     /// </summary>
     /// <remarks>
-    /// If the underlying command is not running, or if it does not support cancelation, this method will perform no action.
-    /// Note that even with a successful cancelation, the completion of the current operation might not be immediate.
+    /// 如果底层命令未运行，或者不支持取消，则此方法将不执行任何操作。
+    /// 请注意，即使取消成功，当前操作的完成可能也不是立即的。
     /// </remarks>
     void Cancel();
 }

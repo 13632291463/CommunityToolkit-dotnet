@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 namespace CommunityToolkit.Mvvm.ComponentModel.__Internals;
 
 /// <summary>
-/// An internal helper used to support <see cref="ObservableObject"/> and generated code from its template.
-/// This type is not intended to be used directly by user code.
+/// 一个内部帮助类，用于支持 <see cref="ObservableObject"/> 和从其模板生成的代码。
+/// 此类型不打算由用户代码直接使用。
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [Obsolete("This type is not intended to be used directly by user code")]
 public static class __TaskExtensions
 {
     /// <summary>
-    /// Gets an awaitable object that skips end validation.
+    /// 获取一个跳过结束验证的可等待对象。
     /// </summary>
-    /// <param name="task">The input <see cref="Task"/> to get the awaitable for.</param>
-    /// <returns>A <see cref="TaskAwaitableWithoutEndValidation"/> object wrapping <paramref name="task"/>.</returns>
+    /// <param name="task">要为其获取可等待对象的输入 <see cref="Task"/>。</param>
+    /// <returns>包装 <paramref name="task"/> 的 <see cref="TaskAwaitableWithoutEndValidation"/> 对象。</returns>
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("This method is not intended to be called directly by user code")]
     public static TaskAwaitableWithoutEndValidation GetAwaitableWithoutEndValidation(this Task task)
@@ -30,21 +30,21 @@ public static class __TaskExtensions
     }
 
     /// <summary>
-    /// A custom task awaitable object that skips end validation.
+    /// 一个跳过结束验证的自定义任务可等待对象。
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("This type is not intended to be called directly by user code")]
     public readonly struct TaskAwaitableWithoutEndValidation
     {
         /// <summary>
-        /// The wrapped <see cref="Task"/> instance to create an awaiter for.
+        /// 要为其创建等待器的包装 <see cref="Task"/> 实例。
         /// </summary>
         private readonly Task task;
 
         /// <summary>
-        /// Creates a new <see cref="TaskAwaitableWithoutEndValidation"/> instance with the specified parameters.
+        /// 使用指定参数创建新的 <see cref="TaskAwaitableWithoutEndValidation"/> 实例。
         /// </summary>
-        /// <param name="task">The wrapped <see cref="Task"/> instance to create an awaiter for.</param>
+        /// <param name="task">要为其创建等待器的包装 <see cref="Task"/> 实例。</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TaskAwaitableWithoutEndValidation(Task task)
         {
@@ -52,9 +52,9 @@ public static class __TaskExtensions
         }
 
         /// <summary>
-        /// Gets an <see cref="Awaiter"/> instance for the current underlying task.
+        /// 为当前底层任务获取 <see cref="Awaiter"/> 实例。
         /// </summary>
-        /// <returns>An <see cref="Awaiter"/> instance for the current underlying task.</returns>
+        /// <returns>当前底层任务的 <see cref="Awaiter"/> 实例。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Awaiter GetAwaiter()
         {
@@ -62,28 +62,28 @@ public static class __TaskExtensions
         }
 
         /// <summary>
-        /// An awaiter object for <see cref="TaskAwaitableWithoutEndValidation"/>.
+        /// <see cref="TaskAwaitableWithoutEndValidation"/> 的等待器对象。
         /// </summary>
         public readonly struct Awaiter : ICriticalNotifyCompletion
         {
             /// <summary>
-            /// The underlying <see cref="TaskAwaiter"/> instance.
+            /// 底层 <see cref="TaskAwaiter"/> 实例。
             /// </summary>
             private readonly TaskAwaiter taskAwaiter;
 
             /// <summary>
-            /// Creates a new <see cref="Awaiter"/> instance with the specified parameters.
+            /// 使用指定参数创建新的 <see cref="Awaiter"/> 实例。
             /// </summary>
-            /// <param name="task">The wrapped <see cref="Task"/> instance to create an awaiter for.</param>
+            /// <param name="task">要为其创建等待器的包装 <see cref="Task"/> 实例。</param>
             public Awaiter(Task task)
             {
                 this.taskAwaiter = task.GetAwaiter();
             }
 
             /// <summary>
-            /// Gets whether the operation has completed or not.
+            /// 获取操作是否已完成。
             /// </summary>
-            /// <remarks>This property is intended for compiler user rather than use directly in code.</remarks>
+            /// <remarks>此属性供编译器用户使用，而不是在代码中直接使用。</remarks>
             public bool IsCompleted
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -91,9 +91,9 @@ public static class __TaskExtensions
             }
 
             /// <summary>
-            /// Ends the await operation.
+            /// 结束等待操作。
             /// </summary>
-            /// <remarks>This method is intended for compiler user rather than use directly in code.</remarks>
+            /// <remarks>此方法供编译器用户使用，而不是在代码中直接使用。</remarks>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void GetResult()
             {

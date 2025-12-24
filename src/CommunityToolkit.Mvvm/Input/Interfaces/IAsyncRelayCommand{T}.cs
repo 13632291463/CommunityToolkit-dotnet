@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// A generic interface representing a more specific version of <see cref="IAsyncRelayCommand"/>.
+/// 一个泛型接口，表示更具体的 <see cref="IAsyncRelayCommand"/> 版本
 /// </summary>
-/// <typeparam name="T">The type used as argument for the interface methods.</typeparam>
-/// <remarks>This interface is needed to solve the diamond problem with base classes.</remarks>
+/// <typeparam name="T">用作接口方法参数的类型。</typeparam>
+/// <remarks>此接口用于解决基类的菱形问题。</remarks>
 public interface IAsyncRelayCommand<in T> : IAsyncRelayCommand, IRelayCommand<T>
 {
     /// <summary>
-    /// Provides a strongly-typed variant of <see cref="IAsyncRelayCommand.ExecuteAsync"/>.
+    /// 提供 <see cref="IAsyncRelayCommand.ExecuteAsync"/> 的强类型变体
     /// </summary>
-    /// <param name="parameter">The input parameter.</param>
-    /// <returns>The <see cref="Task"/> representing the async operation being executed.</returns>
+    /// <param name="parameter">输入参数</param>
+    /// <returns>表示正在执行的异步操作的 <see cref="Task"/></returns>
     Task ExecuteAsync(T? parameter);
 }

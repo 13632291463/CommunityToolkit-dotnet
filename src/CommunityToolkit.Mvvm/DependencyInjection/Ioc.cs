@@ -53,7 +53,12 @@ public sealed partial class Ioc : IServiceProvider
     /// </summary>
     private volatile IServiceProvider? serviceProvider;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取指定类型的服务对象
+    /// </summary>
+    /// <param name="serviceType">要获取的服务对象的类型</param>
+    /// <returns>服务对象，如果找不到则为null</returns>
+    /// <exception cref="ArgumentNullException">当serviceType为null时抛出</exception>
     public object? GetService(Type serviceType)
     {
         ArgumentNullException.ThrowIfNull(serviceType);
@@ -80,11 +85,11 @@ public sealed partial class Ioc : IServiceProvider
     }
 
     /// <summary>
-    /// Tries to resolve an instance of a specified service type.
+    /// 尝试解析指定服务类型的实例
     /// </summary>
-    /// <typeparam name="T">The type of service to resolve.</typeparam>
-    /// <returns>An instance of the specified service, or <see langword="null"/>.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the current <see cref="Ioc"/> instance has not been initialized.</exception>
+    /// <typeparam name="T">要解析的服务类型</typeparam>
+    /// <returns>指定服务类型的实例，如果找不到则为null</returns>
+    /// <exception cref="InvalidOperationException">当前Ioc实例未初始化时抛出</exception>
     public T? GetService<T>()
         where T : class
     {
@@ -99,14 +104,11 @@ public sealed partial class Ioc : IServiceProvider
     }
 
     /// <summary>
-    /// Resolves an instance of a specified service type.
+    /// 解析指定服务类型的实例
     /// </summary>
-    /// <typeparam name="T">The type of service to resolve.</typeparam>
-    /// <returns>An instance of the specified service, or <see langword="null"/>.</returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if the current <see cref="Ioc"/> instance has not been initialized, or if the
-    /// requested service type was not registered in the service provider currently in use.
-    /// </exception>
+    /// <typeparam name="T">要解析的服务类型</typeparam>
+    /// <returns>指定服务类型的实例</returns>
+    /// <exception cref="InvalidOperationException">当前Ioc实例未初始化或请求的服务类型未在服务提供程序中注册时抛出</exception>
     public T GetRequiredService<T>()
         where T : class
     {
@@ -128,14 +130,15 @@ public sealed partial class Ioc : IServiceProvider
     }
 
     /// <summary>
-    /// Initializes the shared <see cref="IServiceProvider"/> instance.
+    /// 初始化共享的IServiceProvider实例
     /// </summary>
-    /// <param name="serviceProvider">The input <see cref="IServiceProvider"/> instance to use.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
+    /// <param name="serviceProvider">要使用的IServiceProvider实例</param>
+    /// <exception cref="System.ArgumentNullException">当serviceProvider为null时抛出</exception>
     public void ConfigureServices(IServiceProvider serviceProvider)
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
+        // 使用原子比较交换操作设置服务提供者，确保线程安全
         IServiceProvider? oldServices = Interlocked.CompareExchange(ref this.serviceProvider, serviceProvider, null);
 
         if (oldServices is not null)
@@ -145,7 +148,7 @@ public sealed partial class Ioc : IServiceProvider
     }
 
     /// <summary>
-    /// Throws an <see cref="InvalidOperationException"/> when the <see cref="IServiceProvider"/> property is used before initialization.
+    /// 当IServiceProvider属性在初始化前被使用时抛出InvalidOperationException
     /// </summary>
     [DoesNotReturn]
     private static void ThrowInvalidOperationExceptionForMissingInitialization()
@@ -154,7 +157,7 @@ public sealed partial class Ioc : IServiceProvider
     }
 
     /// <summary>
-    /// Throws an <see cref="InvalidOperationException"/> when the <see cref="IServiceProvider"/> property is missing a type registration.
+    /// 当IServiceProvider缺少类型注册时抛出InvalidOperationException
     /// </summary>
     [DoesNotReturn]
     private static void ThrowInvalidOperationExceptionForUnregisteredType()
@@ -163,7 +166,7 @@ public sealed partial class Ioc : IServiceProvider
     }
 
     /// <summary>
-    /// Throws an <see cref="InvalidOperationException"/> when a configuration is attempted more than once.
+    /// 当尝试多次配置时抛出InvalidOperationException
     /// </summary>
     [DoesNotReturn]
     private static void ThrowInvalidOperationExceptionForRepeatedConfiguration()

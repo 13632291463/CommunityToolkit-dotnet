@@ -67,6 +67,14 @@ namespace CommunityToolkit.Mvvm.ComponentModel;
 /// source field name will be converted to uppercase (eg. <c>isEnabled</c> to <c>IsEnabled</c>).
 /// </para>
 /// </remarks>
+/// <summary>
+/// 指示给定的部分属性应由源生成器实现的特性。
+/// 要使用此特性，包含类型必须继承自 <see cref="ObservableObject"/>，或者必须使用
+/// <see cref="ObservableObjectAttribute"/> 或 <see cref="INotifyPropertyChangedAttribute"/>。
+/// 如果包含类型还实现了 <see cref="INotifyPropertyChanging"/>（即，如果它继承自
+/// <see cref="ObservableObject"/> 或使用 <see cref="ObservableObjectAttribute"/>），则生成的代码
+/// 也会调用 <see cref="ObservableObject.OnPropertyChanging(PropertyChangingEventArgs)"/> 来发出该事件。
+/// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 public sealed class ObservablePropertyAttribute : Attribute
 {

@@ -5,12 +5,12 @@
 namespace CommunityToolkit.Mvvm.Input.Internals;
 
 /// <summary>
-/// An interface for commands that know whether they support cancellation or not.
+/// 一个接口，用于标识命令是否支持取消操作
 /// </summary>
 internal interface ICancellationAwareCommand
 {
     /// <summary>
-    /// Gets whether or not the current command supports cancellation.
+    /// 获取当前命令是否支持取消操作
     /// </summary>
     bool IsCancellationSupported { get; }
 }

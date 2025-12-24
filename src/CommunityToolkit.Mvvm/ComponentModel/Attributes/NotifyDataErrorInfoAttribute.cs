@@ -44,6 +44,10 @@ namespace CommunityToolkit.Mvvm.ComponentModel;
 /// Just like <see cref="ObservablePropertyAttribute"/>, this attribute can also be used on fields as well.
 /// </para>
 /// </remarks>
+/// <summary>
+/// 指示目标类、字段或属性应实现 INotifyDataErrorInfo 接口以支持数据验证错误通知
+/// 此特性用于标记需要进行数据错误验证通知的类、字段或属性
+/// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class NotifyDataErrorInfoAttribute : Attribute
 {

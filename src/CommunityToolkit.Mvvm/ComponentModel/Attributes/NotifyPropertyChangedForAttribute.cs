@@ -86,29 +86,27 @@ namespace CommunityToolkit.Mvvm.ComponentModel;
 public sealed class NotifyPropertyChangedForAttribute : Attribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="NotifyPropertyChangedForAttribute"/> class.
+    /// 初始化 <see cref="NotifyPropertyChangedForAttribute"/> 类的新实例。
     /// </summary>
-    /// <param name="propertyName">The name of the property to also notify when the annotated property changes.</param>
+    /// <param name="propertyName">当被注解的属性更改时，也需要通知的属性名称。</param>
     public NotifyPropertyChangedForAttribute(string propertyName)
     {
         PropertyNames = new[] { propertyName };
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="NotifyPropertyChangedForAttribute"/> class.
+    /// 初始化 <see cref="NotifyPropertyChangedForAttribute"/> 类的新实例。
     /// </summary>
-    /// <param name="propertyName">The name of the property to also notify when the annotated property changes.</param>
-    /// <param name="otherPropertyNames">
-    /// The other property names to also notify when the annotated property changes. This parameter can optionally
-    /// be used to indicate a series of dependent properties from the same attribute, to keep the code more compact.
-    /// </param>
+    /// <param name="propertyName">当被注解的属性更改时，也需要通知的属性名称。</param>
+    /// <param name="otherPropertyNames">当被注解的属性更改时，也需要通知的其他属性名称。此参数可以可选地
+    /// 用于从同一属性指示一系列依赖属性，以使代码更紧凑。</param>
     public NotifyPropertyChangedForAttribute(string propertyName, params string[] otherPropertyNames)
     {
         PropertyNames = new[] { propertyName }.Concat(otherPropertyNames).ToArray();
     }
 
     /// <summary>
-    /// Gets the property names to also notify when the annotated property changes.
+    /// 获取当被注解的属性更改时，也需要通知的属性名称。
     /// </summary>
     public string[] PropertyNames { get; }
 }

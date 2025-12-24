@@ -8,15 +8,15 @@ using System.Windows.Input;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// An attribute that can be used to automatically generate <see cref="ICommand"/> properties from declared methods. When this attribute
-/// is used to decorate a method, a generator will create a command property with the corresponding <see cref="IRelayCommand"/> interface
-/// depending on the signature of the method. If an invalid method signature is used, the generator will report an error.
+/// 一个属性，可用于从声明的方法自动生成 <see cref="ICommand"/> 属性。当此属性
+/// 用于装饰方法时，生成器将根据方法的签名创建具有相应 <see cref="IRelayCommand"/> 接口的命令属性。
+/// 如果使用无效的方法签名，生成器将报告错误。
 /// <para>
-/// In order to use this attribute, the containing type doesn't need to implement any interfaces. The generated properties will be lazily
-/// assigned but their value will never change, so there is no need to support property change notifications or other additional functionality.
+/// 为了使用此属性，包含类型无需实现任何接口。生成的属性将被延迟分配，但其值不会改变，
+/// 因此无需支持属性更改通知或其他附加功能。
 /// </para>
 /// <para>
-/// This attribute can be used as follows:
+/// 此属性可以这样使用:
 /// <code>
 /// partial class MyViewModel
 /// {
@@ -27,7 +27,7 @@ namespace CommunityToolkit.Mvvm.Input;
 ///     }
 /// }
 /// </code>
-/// And with this, code analogous to this will be generated:
+/// 使用此方式，将生成类似这样的代码:
 /// <code>
 /// partial class MyViewModel
 /// {
@@ -38,71 +38,68 @@ namespace CommunityToolkit.Mvvm.Input;
 /// </code>
 /// </para>
 /// <para>
-/// The following signatures are supported for annotated methods:
+/// 下列签名支持被注解的方法:
 /// <code>
 /// void Method();
 /// </code>
-/// Will generate an <see cref="IRelayCommand"/> property (using a <see cref="RelayCommand"/> instance).
+/// 将生成一个 <see cref="IRelayCommand"/> 属性 (使用 <see cref="RelayCommand"/> 实例)。
 /// <code>
 /// void Method(T?);
 /// </code>
-/// Will generate an <see cref="IRelayCommand{T}"/> property (using a <see cref="RelayCommand{T}"/> instance).
+/// 将生成一个 <see cref="IRelayCommand{T}"/> 属性 (使用 <see cref="RelayCommand{T}"/> 实例)。
 /// <code>
 /// Task Method();
 /// Task Method(CancellationToken);
 /// Task&lt;T&gt; Method();
 /// Task&lt;T&gt; Method(CancellationToken);
 /// </code>
-/// Will both generate an <see cref="IAsyncRelayCommand"/> property (using an <see cref="AsyncRelayCommand{T}"/> instance).
+/// 都将生成一个 <see cref="IAsyncRelayCommand"/> 属性 (使用 <see cref="AsyncRelayCommand{T}"/> 实例)。
 /// <code>
 /// Task Method(T?);
 /// Task Method(T?, CancellationToken);
 /// Task&lt;T&gt; Method(T?);
 /// Task&lt;T&gt; Method(T?, CancellationToken);
 /// </code>
-/// Will both generate an <see cref="IAsyncRelayCommand{T}"/> property (using an <see cref="AsyncRelayCommand{T}"/> instance).
+/// 都将生成一个 <see cref="IAsyncRelayCommand{T}"/> 属性 (使用 <see cref="AsyncRelayCommand{T}"/> 实例)。
 /// </para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class RelayCommandAttribute : Attribute
 {
     /// <summary>
-    /// Gets or sets the name of the property or method that will be invoked to check whether the
-    /// generated command can be executed at any given time. The referenced member needs to return
-    /// a <see cref="bool"/> value, and has to have a signature compatible with the target command.
+    /// 获取或设置用于检查生成的命令在任何给定时间是否可以执行的属性或方法的名称。引用的成员需要返回
+    /// 一个 <see cref="bool"/> 值，并且必须具有与目标命令兼容的签名。
     /// </summary>
     public string? CanExecute { get; init; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether or not to allow concurrent executions for an asynchronous command.
+    /// 获取或设置一个值，指示是否允许异步命令的并发执行。
     /// <para>
-    /// When set for an attribute used on a method that would result in an <see cref="AsyncRelayCommand"/> or an
-    /// <see cref="AsyncRelayCommand{T}"/> property to be generated, this will modify the behavior of these commands
-    /// when an execution is invoked while a previous one is still running. It is the same as creating an instance of
-    /// these command types with a constructor such as <see cref="AsyncRelayCommand(Func{System.Threading.Tasks.Task}, AsyncRelayCommandOptions)"/>
-    /// and using the <see cref="AsyncRelayCommandOptions.AllowConcurrentExecutions"/> value.
+    /// 当设置用于将生成 <see cref="AsyncRelayCommand"/> 或 <see cref="AsyncRelayCommand{T}"/> 属性的方法时，
+    /// 这将修改这些命令在仍运行的命令尚未完成时调用新执行时的行为。这与使用
+    /// <see cref="AsyncRelayCommand(Func{System.Threading.Tasks.Task}, AsyncRelayCommandOptions)"/> 等构造函数创建命令类型实例
+    /// 并使用 <see cref="AsyncRelayCommandOptions.AllowConcurrentExecutions"/> 值相同。
     /// </para>
     /// </summary>
-    /// <remarks>Using this property is not valid if the target command doesn't map to an asynchronous command.</remarks>
+    /// <remarks>如果目标命令不映射到异步命令，则不能使用此属性。</remarks>
     public bool AllowConcurrentExecutions { get; init; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether or not to exceptions should be propagated to <see cref="System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/>.
+    /// 获取或设置一个值，指示异常是否应传播到 <see cref="System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/>。
     /// <para>
-    /// When set for an attribute used on a method that would result in an <see cref="AsyncRelayCommand"/> or an
-    /// <see cref="AsyncRelayCommand{T}"/> property to be generated, this will modify the behavior of these commands
-    /// in case an exception is thrown by the underlying operation. It is the same as creating an instance of
-    /// these command types with a constructor such as <see cref="AsyncRelayCommand(Func{System.Threading.Tasks.Task}, AsyncRelayCommandOptions)"/>
-    /// and using the <see cref="AsyncRelayCommandOptions.FlowExceptionsToTaskScheduler"/> value.
+    /// 当设置用于将生成 <see cref="AsyncRelayCommand"/> 或 <see cref="AsyncRelayCommand{T}"/> 属性的方法时，
+    /// 这将修改这些命令在底层操作抛出异常时的行为。这与使用
+    /// <see cref="AsyncRelayCommand(Func{System.Threading.Tasks.Task}, AsyncRelayCommandOptions)"/> 等构造函数创建命令类型实例
+    /// 并使用 <see cref="AsyncRelayCommandOptions.FlowExceptionsToTaskScheduler"/> 值相同。
     /// </para>
     /// </summary>
-    /// <remarks>Using this property is not valid if the target command doesn't map to an asynchronous command.</remarks>
+    /// <remarks>如果目标命令不映射到异步命令，则不能使用此属性。</remarks>
     public bool FlowExceptionsToTaskScheduler { get; init; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether a cancel command should also be generated for an asynchronous command.
+    /// 获取或设置一个值，指示是否还应为异步命令生成取消命令。
     /// <para>
-    /// When set to <see langword="true"/>, this additional code will be generated:
+    /// 当设置为 <see langword="true"/> 时，将生成以下附加代码:
     /// <code>
     /// partial class MyViewModel
     /// {
@@ -111,9 +108,9 @@ public sealed class RelayCommandAttribute : Attribute
     ///     public ICommand LoginUserCancelCommand => loginUserCancelCommand ??= LoginUserCommand.CreateCancelCommand();
     /// }
     /// </code>
-    /// Where <c>LoginUserCommand</c> is an <see cref="IAsyncRelayCommand"/> defined in the class (or generated by this attribute as well).
+    /// 其中 <c>LoginUserCommand</c> 是在类中定义的(或由此属性生成的) <see cref="IAsyncRelayCommand"/>。
     /// </para>
     /// </summary>
-    /// <remarks>Using this property is not valid if the target command doesn't map to a cancellable asynchronous command.</remarks>
+    /// <remarks>如果目标命令不映射到可取消的异步命令，则不能使用此属性。</remarks>
     public bool IncludeCancelCommand { get; init; }
 }

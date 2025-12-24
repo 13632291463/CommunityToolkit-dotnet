@@ -7,23 +7,23 @@ using System.Windows.Input;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// A generic interface representing a more specific version of <see cref="IRelayCommand"/>.
+/// 一个泛型接口，表示更具体的 <see cref="IRelayCommand"/> 版本
 /// </summary>
-/// <typeparam name="T">The type used as argument for the interface methods.</typeparam>
+/// <typeparam name="T">用作接口方法参数的类型</typeparam>
 public interface IRelayCommand<in T> : IRelayCommand
 {
     /// <summary>
-    /// Provides a strongly-typed variant of <see cref="ICommand.CanExecute(object)"/>.
+    /// 提供 <see cref="ICommand.CanExecute(object)"/> 的强类型变体
     /// </summary>
-    /// <param name="parameter">The input parameter.</param>
-    /// <returns>Whether or not the current command can be executed.</returns>
-    /// <remarks>Use this overload to avoid boxing, if <typeparamref name="T"/> is a value type.</remarks>
+    /// <param name="parameter">输入参数</param>
+    /// <returns>当前命令是否可以执行</returns>
+    /// <remarks>如果 <typeparamref name="T"/> 是值类型，请使用此重载以避免装箱</remarks>
     bool CanExecute(T? parameter);
 
     /// <summary>
-    /// Provides a strongly-typed variant of <see cref="ICommand.Execute(object)"/>.
+    /// 提供 <see cref="ICommand.Execute(object)"/> 的强类型变体
     /// </summary>
-    /// <param name="parameter">The input parameter.</param>
-    /// <remarks>Use this overload to avoid boxing, if <typeparamref name="T"/> is a value type.</remarks>
+    /// <param name="parameter">输入参数</param>
+    /// <remarks>如果 <typeparamref name="T"/> 是值类型，请使用此重载以避免装箱</remarks>
     void Execute(T? parameter);
 }

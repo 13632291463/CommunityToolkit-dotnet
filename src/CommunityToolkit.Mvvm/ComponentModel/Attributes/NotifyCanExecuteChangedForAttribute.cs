@@ -51,25 +51,29 @@ namespace CommunityToolkit.Mvvm.ComponentModel;
 /// <remarks>
 /// Just like <see cref="ObservablePropertyAttribute"/>, this attribute can also be used on fields as well.
 /// </remarks>
+/// <summary>
+/// 指定当使用此特性标记的属性更改时，还应通知哪些命令的CanExecute状态发生更改。
+/// 此特性应用于属性或字段，以指示当该属性或字段更改时，指定的命令应更新其CanExecute状态。
+/// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
 public sealed class NotifyCanExecuteChangedForAttribute : Attribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="NotifyCanExecuteChangedForAttribute"/> class.
+    /// 初始化 <see cref="NotifyCanExecuteChangedForAttribute"/> 类的新实例。
     /// </summary>
-    /// <param name="commandName">The name of the command to also notify when the annotated property changes.</param>
+    /// <param name="commandName">当标记的属性更改时也要通知的命令名称。</param>
     public NotifyCanExecuteChangedForAttribute(string commandName)
     {
         CommandNames = new[] { commandName };
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="NotifyCanExecuteChangedForAttribute"/> class.
+    /// 初始化 <see cref="NotifyCanExecuteChangedForAttribute"/> 类的新实例。
     /// </summary>
-    /// <param name="commandName">The name of the property to also notify when the annotated property changes.</param>
+    /// <param name="commandName">当标记的属性更改时也要通知的命令名称。</param>
     /// <param name="otherCommandNames">
-    /// The other command names to also notify when the annotated property changes. This parameter can optionally
-    /// be used to indicate a series of dependent commands from the same attribute, to keep the code more compact.
+    /// 当标记的属性更改时也要通知的其他命令名称。此参数可选择性地
+    /// 用于从同一特性指示一系列相关命令，以使代码更紧凑。
     /// </param>
     public NotifyCanExecuteChangedForAttribute(string commandName, params string[] otherCommandNames)
     {
@@ -77,7 +81,7 @@ public sealed class NotifyCanExecuteChangedForAttribute : Attribute
     }
 
     /// <summary>
-    /// Gets the command names to also notify when the annotated property changes.
+    /// 获取当标记的属性更改时也要通知的命令名称。
     /// </summary>
     public string[] CommandNames { get; }
 }

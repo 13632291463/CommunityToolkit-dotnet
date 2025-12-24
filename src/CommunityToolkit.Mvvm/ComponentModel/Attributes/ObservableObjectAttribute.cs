@@ -8,22 +8,22 @@ using System.ComponentModel;
 namespace CommunityToolkit.Mvvm.ComponentModel;
 
 /// <summary>
-/// An attribute that indicates that a given type should have all the members from <see cref="ObservableObject"/>
-/// generated into it, as well as the <see cref="INotifyPropertyChanged"/> and <see cref="INotifyPropertyChanging"/>
-/// interfaces. This can be useful when you want the same functionality from <see cref="ObservableObject"/> into a class
-/// that already inherits from another one (since C# doesn't support multiple inheritance). This attribute will trigger
-/// the source generator to just create the same APIs directly into the decorated class.
+/// 一个属性，表示给定类型应具有来自 <see cref="ObservableObject"/> 的所有成员
+/// 并生成到其中，以及 <see cref="INotifyPropertyChanged"/> 和 <see cref="INotifyPropertyChanging"/>
+/// 接口。当您想在已从另一个类继承的类中获得与 <see cref="ObservableObject"/> 相同的功能时，这会很有用
+/// （因为 C# 不支持多重继承）。此属性将触发源生成器
+/// 将相同的 API 直接创建到装饰类中。
 /// <para>
-/// This attribute can be used as follows:
+/// 此属性可以这样使用:
 /// <code>
 /// [ObservableObject]
 /// partial class MyViewModel : SomeOtherClass
 /// {
-///     // Other members here...
+///     // 其他成员在这里...
 /// }
 /// </code>
 /// </para>
-/// And with this, the same APIs from <see cref="ObservableObject"/> will be available on this type as well.
+/// 使用此方法后，<see cref="ObservableObject"/> 的相同 API 也可用于此类。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class ObservableObjectAttribute : Attribute

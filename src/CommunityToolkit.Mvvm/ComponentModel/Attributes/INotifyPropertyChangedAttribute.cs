@@ -27,11 +27,11 @@ namespace CommunityToolkit.Mvvm.ComponentModel;
 public sealed class INotifyPropertyChangedAttribute : Attribute
 {
     /// <summary>
-    /// Gets or sets a value indicating whether or not to also generate all the additional helper methods that are found
-    /// in <see cref="ObservableObject"/> as well (eg. <see cref="ObservableObject.SetProperty{T}(ref T, T, string?)"/>).
-    /// If set to <see langword="false"/>, only the <see cref="INotifyPropertyChanged.PropertyChanged"/> event and
-    /// the two <see cref="ObservableObject.OnPropertyChanged(PropertyChangedEventArgs)"/> overloads will be generated.
-    /// The default value is <see langword="true"/>.
+    /// 获取或设置一个值，该值指示是否还要生成在 <see cref="ObservableObject"/> 中找到的所有附加帮助方法
+    /// （例如 <see cref="ObservableObject.SetProperty{T}(ref T, T, string?)"/>）。
+    /// 如果设置为 <see langword="false"/>，则只生成 <see cref="INotifyPropertyChanged.PropertyChanged"/> 事件
+    /// 和两个 <see cref="ObservableObject.OnPropertyChanged(PropertyChangedEventArgs)"/> 重载。
+    /// 默认值为 <see langword="true"/>。
     /// </summary>
     public bool IncludeAdditionalHelperMethods { get; init; } = true;
 }

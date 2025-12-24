@@ -7,13 +7,12 @@ using System.Windows.Input;
 namespace CommunityToolkit.Mvvm.Input;
 
 /// <summary>
-/// An interface expanding <see cref="ICommand"/> with the ability to raise
-/// the <see cref="ICommand.CanExecuteChanged"/> event externally.
+/// 一个接口，扩展 <see cref="ICommand"/>，具有外部触发 <see cref="ICommand.CanExecuteChanged"/> 事件的能力
 /// </summary>
 public interface IRelayCommand : ICommand
 {
     /// <summary>
-    /// Notifies that the <see cref="ICommand.CanExecute"/> property has changed.
+    /// 通知 <see cref="ICommand.CanExecute"/> 属性已更改
     /// </summary>
     void NotifyCanExecuteChanged();
 }
