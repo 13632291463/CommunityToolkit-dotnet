@@ -5,14 +5,15 @@
 namespace CommunityToolkit.Mvvm.Collections;
 
 /// <summary>
-/// An interface for a grouped collection of items.
+/// 表示一个分组项目的集合接口
 /// </summary>
-/// <typeparam name="TKey">The type of the group key.</typeparam>
+/// <typeparam name="TKey">分组键的类型</typeparam>
 public interface IReadOnlyObservableGroup<out TKey> : IReadOnlyObservableGroup
     where TKey : notnull
 {
     /// <summary>
-    /// Gets the key for the current collection.
+    /// 获取当前集合的键
     /// </summary>
+    /// <returns>当前分组的键值</returns>
     new TKey Key { get; }
 }

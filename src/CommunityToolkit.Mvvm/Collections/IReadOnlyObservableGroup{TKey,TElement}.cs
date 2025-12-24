@@ -8,18 +8,18 @@ using System.Linq;
 namespace CommunityToolkit.Mvvm.Collections;
 
 /// <summary>
-/// An interface for a grouped collection of items.
+/// 表示一个分组项集合的接口
 /// </summary>
-/// <typeparam name="TKey">The type of the group key.</typeparam>
-/// <typeparam name="TElement">The type of elements in the group.</typeparam>
+/// <typeparam name="TKey">分组键的类型</typeparam>
+/// <typeparam name="TElement">分组中元素的类型</typeparam>
 public interface IReadOnlyObservableGroup<out TKey, out TElement> : IReadOnlyObservableGroup<TKey>, IReadOnlyList<TElement>, IGrouping<TKey, TElement>
     where TKey : notnull
 {
     /// <summary>
-    /// Gets the element at the specified index in the current collection.
+    /// 获取当前集合中指定索引处的元素
     /// </summary>
-    /// <param name="index">The zero-based index of the element to get.</param>
-    /// <returns>The element at the specified index in the read-only list.</returns>
-    /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the index is out of range.</exception>
+    /// <param name="index">要获取元素的从零开始的索引</param>
+    /// <returns>只读列表中指定索引处的元素</returns>
+    /// <exception cref="System.ArgumentOutOfRangeException">如果索引超出范围则抛出此异常</exception>
     new TElement this[int index] { get; }
 }

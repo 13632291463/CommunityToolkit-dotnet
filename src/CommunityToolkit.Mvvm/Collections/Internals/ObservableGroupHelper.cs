@@ -7,12 +7,12 @@ using System.ComponentModel;
 namespace CommunityToolkit.Mvvm.Collections.Internals;
 
 /// <summary>
-/// A helper type for the <see cref="ObservableGroup{TKey, TValue}"/> type.
+/// ObservableGroup{TKey, TValue} 类型的辅助类
 /// </summary>
 internal static class ObservableGroupHelper
 {
     /// <summary>
-    /// The cached <see cref="PropertyChangedEventArgs"/> for <see cref="IReadOnlyObservableGroup.Key"/>
+    /// 为 IReadOnlyObservableGroup.Key 属性缓存的 PropertyChangedEventArgs
     /// </summary>
     public static readonly PropertyChangedEventArgs KeyChangedEventArgs = new(nameof(IReadOnlyObservableGroup.Key));
 }

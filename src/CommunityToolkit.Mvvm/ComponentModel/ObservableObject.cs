@@ -26,7 +26,7 @@ using CommunityToolkit.Mvvm.ComponentModel.__Internals;
 namespace CommunityToolkit.Mvvm.ComponentModel;
 
 /// <summary>
-/// A base class for objects of which the properties must be observable.
+/// 一个基类，用于需要属性可观察的对象
 /// </summary>
 public abstract class ObservableObject : INotifyPropertyChanged, INotifyPropertyChanging
 {
@@ -37,10 +37,10 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     public event PropertyChangingEventHandler? PropertyChanging;
 
     /// <summary>
-    /// Raises the <see cref="PropertyChanged"/> event.
+    /// 引发 <see cref="PropertyChanged"/> 事件
     /// </summary>
-    /// <param name="e">The input <see cref="PropertyChangedEventArgs"/> instance.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="e"/> is <see langword="null"/>.</exception>
+    /// <param name="e">输入的 <see cref="PropertyChangedEventArgs"/> 实例</param>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="e"/> 为 <see langword="null"/> 时抛出</exception>
     protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
@@ -49,15 +49,15 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Raises the <see cref="PropertyChanging"/> event.
+    /// 引发 <see cref="PropertyChanging"/> 事件
     /// </summary>
-    /// <param name="e">The input <see cref="PropertyChangingEventArgs"/> instance.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="e"/> is <see langword="null"/>.</exception>
+    /// <param name="e">输入的 <see cref="PropertyChangingEventArgs"/> 实例</param>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="e"/> 为 <see langword="null"/> 时抛出</exception>
     protected virtual void OnPropertyChanging(PropertyChangingEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
 
-        // When support is disabled, just do nothing
+        // 当支持被禁用时，什么都不做
         if (!FeatureSwitches.EnableINotifyPropertyChangingSupport)
         {
             return;
@@ -67,21 +67,21 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Raises the <see cref="PropertyChanged"/> event.
+    /// 引发 <see cref="PropertyChanged"/> 事件
     /// </summary>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
     }
 
     /// <summary>
-    /// Raises the <see cref="PropertyChanging"/> event.
+    /// 引发 <see cref="PropertyChanging"/> 事件
     /// </summary>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
     protected void OnPropertyChanging([CallerMemberName] string? propertyName = null)
     {
-        // When support is disabled, avoid instantiating the event args entirely
+        // 当支持被禁用时，完全避免实例化事件参数
         if (!FeatureSwitches.EnableINotifyPropertyChangingSupport)
         {
             return;
@@ -91,29 +91,27 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given property. If the value has changed,
-    /// raises the <see cref="PropertyChanging"/> event, updates the property with the new
-    /// value, then raises the <see cref="PropertyChanged"/> event.
+    /// 比较给定属性的当前值和新值。如果值已更改，引发 <see cref="PropertyChanging"/> 事件，
+    /// 用新值更新属性，然后引发 <see cref="PropertyChanged"/> 事件
     /// </summary>
-    /// <typeparam name="T">The type of the property that changed.</typeparam>
-    /// <param name="field">The field storing the property's value.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <typeparam name="T">发生更改的属性类型</typeparam>
+    /// <param name="field">存储属性值的字段</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     /// <remarks>
-    /// The <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> events are not raised
-    /// if the current and new value for the target property are the same.
+    /// 如果目标属性的当前值和新值相同，则不会引发 <see cref="PropertyChanging"/> 和 <see cref="PropertyChanged"/> 事件
     /// </remarks>
     protected bool SetProperty<T>([NotNullIfNotNull(nameof(newValue))] ref T field, T newValue, [CallerMemberName] string? propertyName = null)
     {
-        // We duplicate the code here instead of calling the overload because we can't
-        // guarantee that the invoked SetProperty<T> will be inlined, and we need the JIT
-        // to be able to see the full EqualityComparer<T>.Default.Equals call, so that
-        // it'll use the intrinsics version of it and just replace the whole invocation
-        // with a direct comparison when possible (eg. for primitive numeric types).
-        // This is the fastest SetProperty<T> overload so we particularly care about
-        // the codegen quality here, and the code is small and simple enough so that
-        // duplicating it still doesn't make the whole class harder to maintain.
+        // 我们在这里复制代码而不是调用重载，因为我们不能保证
+        // 调用的 SetProperty<T> 会被内联，并且我们需要 JIT
+        // 能够看到完整的 EqualityComparer<T>.Default.Equals 调用，以便
+        // 它会在可能时使用其内部版本，仅将整个调用替换为
+        // 直接比较(例如对于基本数值类型)。
+        // 这是最快的 SetProperty<T> 重载，所以我们特别关注
+        // 这里的代码生成质量，而且代码很小且简单，所以
+        // 复制它仍然不会使整个类更难以维护
         if (EqualityComparer<T>.Default.Equals(field, newValue))
         {
             return false;
@@ -129,18 +127,17 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given property. If the value has changed,
-    /// raises the <see cref="PropertyChanging"/> event, updates the property with the new
-    /// value, then raises the <see cref="PropertyChanged"/> event.
-    /// See additional notes about this overload in <see cref="SetProperty{T}(ref T,T,string)"/>.
+    /// 比较给定属性的当前值和新值。如果值已更改，引发 <see cref="PropertyChanging"/> 事件，
+    /// 用新值更新属性，然后引发 <see cref="PropertyChanged"/> 事件
+    /// 有关此重载的更多说明，请参见 <see cref="SetProperty{T}(ref T,T,string)"/>
     /// </summary>
-    /// <typeparam name="T">The type of the property that changed.</typeparam>
-    /// <param name="field">The field storing the property's value.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="comparer">The <see cref="IEqualityComparer{T}"/> instance to use to compare the input values.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="comparer"/> is <see langword="null"/>.</exception>
+    /// <typeparam name="T">发生更改的属性类型</typeparam>
+    /// <param name="field">存储属性值的字段</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="comparer">用于比较输入值的 <see cref="IEqualityComparer{T}"/> 实例</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="comparer"/> 为 <see langword="null"/> 时抛出</exception>
     protected bool SetProperty<T>([NotNullIfNotNull(nameof(newValue))] ref T field, T newValue, IEqualityComparer<T> comparer, [CallerMemberName] string? propertyName = null)
     {
         ArgumentNullException.ThrowIfNull(comparer);
@@ -160,34 +157,30 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given property. If the value has changed,
-    /// raises the <see cref="PropertyChanging"/> event, updates the property with the new
-    /// value, then raises the <see cref="PropertyChanged"/> event.
-    /// This overload is much less efficient than <see cref="SetProperty{T}(ref T,T,string)"/> and it
-    /// should only be used when the former is not viable (eg. when the target property being
-    /// updated does not directly expose a backing field that can be passed by reference).
-    /// For performance reasons, it is recommended to use a stateful callback if possible through
-    /// the <see cref="SetProperty{TModel,T}(T,T,TModel,Action{TModel,T},string?)"/> whenever possible
-    /// instead of this overload, as that will allow the C# compiler to cache the input callback and
-    /// reduce the memory allocations. More info on that overload are available in the related XML
-    /// docs. This overload is here for completeness and in cases where that is not applicable.
+    /// 比较给定属性的当前值和新值。如果值已更改，引发 <see cref="PropertyChanging"/> 事件，
+    /// 用新值更新属性，然后引发 <see cref="PropertyChanged"/> 事件
+    /// 此重载比 <see cref="SetProperty{T}(ref T,T,string)"/> 效率低得多，仅应在前者不可行时使用
+    /// (例如，当目标属性不直接暴露可以通过引用传递的后备字段时)
+    /// 出于性能原因，建议尽可能使用状态回调，通过 <see cref="SetProperty{TModel,T}(T,T,TModel,Action{TModel,T},string?)"/>
+    /// 而不是此重载，因为这将允许 C# 编译器缓存输入回调并减少内存分配
+    /// 有关该重载的更多信息，请参见相关的 XML 文档
+    /// 此重载在此是为了完整性，并在不适用上述情况时使用
     /// </summary>
-    /// <typeparam name="T">The type of the property that changed.</typeparam>
-    /// <param name="oldValue">The current property value.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="callback">A callback to invoke to update the property value.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <typeparam name="T">发生更改的属性类型</typeparam>
+    /// <param name="oldValue">当前属性值</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="callback">用于更新属性值的回调</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     /// <remarks>
-    /// The <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> events are not raised
-    /// if the current and new value for the target property are the same.
+    /// 如果目标属性的当前值和新值相同，则不会引发 <see cref="PropertyChanging"/> 和 <see cref="PropertyChanged"/> 事件
     /// </remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="callback"/> is <see langword="null"/>.</exception>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="callback"/> 为 <see langword="null"/> 时抛出</exception>
     protected bool SetProperty<T>(T oldValue, T newValue, Action<T> callback, [CallerMemberName] string? propertyName = null)
     {
         ArgumentNullException.ThrowIfNull(callback);
 
-        // We avoid calling the overload again to ensure the comparison is inlined
+        // 我们避免再次调用重载以确保比较被内联
         if (EqualityComparer<T>.Default.Equals(oldValue, newValue))
         {
             return false;
@@ -203,19 +196,18 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given property. If the value has changed,
-    /// raises the <see cref="PropertyChanging"/> event, updates the property with the new
-    /// value, then raises the <see cref="PropertyChanged"/> event.
-    /// See additional notes about this overload in <see cref="SetProperty{T}(T,T,Action{T},string)"/>.
+    /// 比较给定属性的当前值和新值。如果值已更改，引发 <see cref="PropertyChanging"/> 事件，
+    /// 用新值更新属性，然后引发 <see cref="PropertyChanged"/> 事件
+    /// 有关此重载的更多说明，请参见 <see cref="SetProperty{T}(T,T,Action{T},string)"/>
     /// </summary>
-    /// <typeparam name="T">The type of the property that changed.</typeparam>
-    /// <param name="oldValue">The current property value.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="comparer">The <see cref="IEqualityComparer{T}"/> instance to use to compare the input values.</param>
-    /// <param name="callback">A callback to invoke to update the property value.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="comparer"/> or <paramref name="callback"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="T">发生更改的属性类型</typeparam>
+    /// <param name="oldValue">当前属性值</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="comparer">用于比较输入值的 <see cref="IEqualityComparer{T}"/> 实例</param>
+    /// <param name="callback">用于更新属性值的回调</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="comparer"/> 或 <paramref name="callback"/> 为 <see langword="null"/> 时抛出</exception>
     protected bool SetProperty<T>(T oldValue, T newValue, IEqualityComparer<T> comparer, Action<T> callback, [CallerMemberName] string? propertyName = null)
     {
         ArgumentNullException.ThrowIfNull(comparer);
@@ -236,21 +228,20 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given nested property. If the value has changed,
-    /// raises the <see cref="PropertyChanging"/> event, updates the property and then raises the
-    /// <see cref="PropertyChanged"/> event. The behavior mirrors that of <see cref="SetProperty{T}(ref T,T,string)"/>,
-    /// with the difference being that this method is used to relay properties from a wrapped model in the
-    /// current instance. This type is useful when creating wrapping, bindable objects that operate over
-    /// models that lack support for notification (eg. for CRUD operations).
-    /// Suppose we have this model (eg. for a database row in a table):
+    /// 比较给定嵌套属性的当前值和新值。如果值已更改，引发 <see cref="PropertyChanging"/> 事件，
+    /// 更新属性，然后引发 <see cref="PropertyChanged"/> 事件
+    /// 行为与 <see cref="SetProperty{T}(ref T,T,string)"/> 相同，不同之处在于此方法用于中继
+    /// 当前实例中包装模型的属性
+    /// 此类型在创建对不支持通知的模型进行操作的包装、可绑定对象时很有用(例如，用于 CRUD 操作)
+    /// 假设我们有这个模型(例如，表中数据库行):
     /// <code>
     /// public class Person
     /// {
     ///     public string Name { get; set; }
     /// }
     /// </code>
-    /// We can then use a property to wrap instances of this type into our observable model (which supports
-    /// notifications), injecting the notification to the properties of that model, like so:
+    /// 然后我们可以使用属性将此类型实例包装到我们的可观察模型中(支持通知)，
+    /// 将通知注入到该模型的属性，如下所示:
     /// <code>
     /// public class BindablePerson : ObservableObject
     /// {
@@ -268,26 +259,25 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     ///     }
     /// }
     /// </code>
-    /// This way we can then use the wrapping object in our application, and all those "proxy" properties will
-    /// also raise notifications when changed. Note that this method is not meant to be a replacement for
-    /// <see cref="SetProperty{T}(ref T,T,string)"/>, and it should only be used when relaying properties to a model that
-    /// doesn't support notifications, and only if you can't implement notifications to that model directly (eg. by having
-    /// it inherit from <see cref="ObservableObject"/>). The syntax relies on passing the target model and a stateless callback
-    /// to allow the C# compiler to cache the function, which results in much better performance and no memory usage.
+    /// 这样我们就可以在应用程序中使用包装对象，所有这些"代理"属性也将在更改时引发通知
+    /// 请注意，此方法不是 <see cref="SetProperty{T}(ref T,T,string)"/> 的替代品，
+    /// 它应该仅在中继不支持通知的模型的属性时使用，
+    /// 并且仅在您无法直接为该模型实现通知时使用(例如，通过让其继承自 <see cref="ObservableObject"/>)
+    /// 语法依赖于传递目标模型和无状态回调，以允许 C# 编译器缓存函数，
+    /// 从而获得更好的性能和无内存使用
     /// </summary>
-    /// <typeparam name="TModel">The type of model whose property (or field) to set.</typeparam>
-    /// <typeparam name="T">The type of property (or field) to set.</typeparam>
-    /// <param name="oldValue">The current property value.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="model">The model containing the property being updated.</param>
-    /// <param name="callback">The callback to invoke to set the target property value, if a change has occurred.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <typeparam name="TModel">其属性(或字段)要设置的模型类型</typeparam>
+    /// <typeparam name="T">要设置的属性(或字段)类型</typeparam>
+    /// <param name="oldValue">当前属性值</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="model">包含要更新的属性的模型</param>
+    /// <param name="callback">在发生更改时调用以设置目标属性值的回调</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     /// <remarks>
-    /// The <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> events are not
-    /// raised if the current and new value for the target property are the same.
+    /// 如果目标属性的当前值和新值相同，则不会引发 <see cref="PropertyChanging"/> 和 <see cref="PropertyChanged"/> 事件
     /// </remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="model"/> or <paramref name="callback"/> are <see langword="null"/>.</exception>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="model"/> 或 <paramref name="callback"/> 为 <see langword="null"/> 时抛出</exception>
     protected bool SetProperty<TModel, T>(T oldValue, T newValue, TModel model, Action<TModel, T> callback, [CallerMemberName] string? propertyName = null)
         where TModel : class
     {
@@ -309,22 +299,22 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given nested property. If the value has changed,
-    /// raises the <see cref="PropertyChanging"/> event, updates the property and then raises the
-    /// <see cref="PropertyChanged"/> event. The behavior mirrors that of <see cref="SetProperty{T}(ref T,T,string)"/>,
-    /// with the difference being that this method is used to relay properties from a wrapped model in the
-    /// current instance. See additional notes about this overload in <see cref="SetProperty{TModel,T}(T,T,TModel,Action{TModel,T},string)"/>.
+    /// 比较给定嵌套属性的当前值和新值。如果值已更改，引发 <see cref="PropertyChanging"/> 事件，
+    /// 更新属性，然后引发 <see cref="PropertyChanged"/> 事件
+    /// 行为与 <see cref="SetProperty{T}(ref T,T,string)"/> 相同，不同之处在于此方法用于中继
+    /// 当前实例中包装模型的属性
+    /// 有关此重载的更多说明，请参见 <see cref="SetProperty{TModel,T}(T,T,TModel,Action{TModel,T},string)"/>
     /// </summary>
-    /// <typeparam name="TModel">The type of model whose property (or field) to set.</typeparam>
-    /// <typeparam name="T">The type of property (or field) to set.</typeparam>
-    /// <param name="oldValue">The current property value.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="comparer">The <see cref="IEqualityComparer{T}"/> instance to use to compare the input values.</param>
-    /// <param name="model">The model containing the property being updated.</param>
-    /// <param name="callback">The callback to invoke to set the target property value, if a change has occurred.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="comparer"/>, <paramref name="model"/> or <paramref name="callback"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TModel">其属性(或字段)要设置的模型类型</typeparam>
+    /// <typeparam name="T">要设置的属性(或字段)类型</typeparam>
+    /// <param name="oldValue">当前属性值</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="comparer">用于比较输入值的 <see cref="IEqualityComparer{T}"/> 实例</param>
+    /// <param name="model">包含要更新的属性的模型</param>
+    /// <param name="callback">在发生更改时调用以设置目标属性值的回调</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="comparer"/>、<paramref name="model"/> 或 <paramref name="callback"/> 为 <see langword="null"/> 时抛出</exception>
     protected bool SetProperty<TModel, T>(T oldValue, T newValue, IEqualityComparer<T> comparer, TModel model, Action<TModel, T> callback, [CallerMemberName] string? propertyName = null)
         where TModel : class
     {
@@ -347,18 +337,16 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given field (which should be the backing
-    /// field for a property). If the value has changed, raises the <see cref="PropertyChanging"/>
-    /// event, updates the field and then raises the <see cref="PropertyChanged"/> event.
-    /// The behavior mirrors that of <see cref="SetProperty{T}(ref T,T,string)"/>, with the difference being that
-    /// this method will also monitor the new value of the property (a generic <see cref="Task"/>) and will also
-    /// raise the <see cref="PropertyChanged"/> again for the target property when it completes.
-    /// This can be used to update bindings observing that <see cref="Task"/> or any of its properties.
-    /// This method and its overload specifically rely on the <see cref="TaskNotifier"/> type, which needs
-    /// to be used in the backing field for the target <see cref="Task"/> property. The field doesn't need to be
-    /// initialized, as this method will take care of doing that automatically. The <see cref="TaskNotifier"/>
-    /// type also includes an implicit operator, so it can be assigned to any <see cref="Task"/> instance directly.
-    /// Here is a sample property declaration using this method:
+    /// 比较给定字段的当前值和新值(应该是属性的后备字段)
+    /// 如果值已更改，引发 <see cref="PropertyChanging"/> 事件，更新字段，
+    /// 然后引发 <see cref="PropertyChanged"/> 事件
+    /// 行为与 <see cref="SetProperty{T}(ref T,T,string)"/> 相同，不同之处在于此方法还将
+    /// 监控属性的新值(一个泛型 <see cref="Task"/>)，并在其完成时再次为该目标属性引发 <see cref="PropertyChanged"/>
+    /// 这可以用于更新绑定到该 <see cref="Task"/> 或其任何属性的绑定
+    /// 此方法及其重载专门依赖 <see cref="TaskNotifier"/> 类型，需要在目标 <see cref="Task"/> 属性的后备字段中使用
+    /// 该字段不需要初始化，因为此方法将自动处理
+    /// <see cref="TaskNotifier"/> 类型还包括一个隐式运算符，因此可以直接分配给任何 <see cref="Task"/> 实例
+    /// 以下是使用此方法的属性声明示例:
     /// <code>
     /// private TaskNotifier myTask;
     ///
@@ -369,45 +357,44 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     /// }
     /// </code>
     /// </summary>
-    /// <param name="taskNotifier">The field notifier to modify.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <param name="taskNotifier">要修改的字段通知器</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     /// <remarks>
-    /// The <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> events are not raised if the current
-    /// and new value for the target property are the same. The return value being <see langword="true"/> only
-    /// indicates that the new value being assigned to <paramref name="taskNotifier"/> is different than the previous one,
-    /// and it does not mean the new <see cref="Task"/> instance passed as argument is in any particular state.
+    /// 如果目标属性的当前值和新值相同，则不会引发 <see cref="PropertyChanging"/> 和 <see cref="PropertyChanged"/> 事件
+    /// 返回值为 <see langword="true"/> 仅表示分配给 <paramref name="taskNotifier"/> 的新值与前一个值不同，
+    /// 并不意味着作为参数传递的新 <see cref="Task"/> 实例处于任何特定状态
     /// </remarks>
     protected bool SetPropertyAndNotifyOnCompletion([NotNull] ref TaskNotifier? taskNotifier, Task? newValue, [CallerMemberName] string? propertyName = null)
     {
-        // We invoke the overload with a callback here to avoid code duplication, and simply pass an empty callback.
-        // The lambda expression here is transformed by the C# compiler into an empty closure class with a
-        // static singleton field containing a closure instance, and another caching the instantiated Action<TTask>
-        // instance. This will result in no further allocations after the first time this method is called for a given
-        // generic type. We only pay the cost of the virtual call to the delegate, but this is not performance critical
-        // code and that overhead would still be much lower than the rest of the method anyway, so that's fine.
+        // 我们在此调用带回调的重载以避免代码重复，只需传递一个空回调
+        // C# 编译器将此处的 lambda 表达式转换为空闭包类，
+        // 该类包含一个包含闭包实例的静态单例字段，
+        // 以及另一个缓存 Action<TTask> 实例的字段
+        // 这将在首次调用此方法时产生分配成本，但此后不会
+        // 泛型类型。我们将支付委托的虚拟调用成本，但这不是性能关键代码，
+        // 而且该开销仍然远低于方法的其余部分，所以没关系
         return SetPropertyAndNotifyOnCompletion(taskNotifier ??= new TaskNotifier(), newValue, null, propertyName);
     }
 
     /// <summary>
-    /// Compares the current and new values for a given field (which should be the backing
-    /// field for a property). If the value has changed, raises the <see cref="PropertyChanging"/>
-    /// event, updates the field and then raises the <see cref="PropertyChanged"/> event.
-    /// This method is just like <see cref="SetPropertyAndNotifyOnCompletion(ref TaskNotifier,Task,string)"/>,
-    /// with the difference being an extra <see cref="Action{T}"/> parameter with a callback being invoked
-    /// either immediately, if the new task has already completed or is <see langword="null"/>, or upon completion.
+    /// 比较给定字段的当前值和新值(应该是属性的后备字段)
+    /// 如果值已更改，引发 <see cref="PropertyChanging"/> 事件，更新字段，
+    /// 然后引发 <see cref="PropertyChanged"/> 事件
+    /// 此方法与 <see cref="SetPropertyAndNotifyOnCompletion(ref TaskNotifier,Task,string)"/> 相同，
+    /// 不同之处在于额外的 <see cref="Action{T}"/> 参数，
+    /// 该参数包含一个回调，在新任务已完成或为 <see langword="null"/> 时立即调用，或在完成时调用
     /// </summary>
-    /// <param name="taskNotifier">The field notifier to modify.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="callback">A callback to invoke to update the property value.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <param name="taskNotifier">要修改的字段通知器</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="callback">用于更新属性值的回调</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     /// <remarks>
-    /// The <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> events are not raised
-    /// if the current and new value for the target property are the same.
+    /// 如果目标属性的当前值和新值相同，则不会引发 <see cref="PropertyChanging"/> 和 <see cref="PropertyChanged"/> 事件
     /// </remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="callback"/> is <see langword="null"/>.</exception>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="callback"/> 为 <see langword="null"/> 时抛出</exception>
     protected bool SetPropertyAndNotifyOnCompletion([NotNull] ref TaskNotifier? taskNotifier, Task? newValue, Action<Task?> callback, [CallerMemberName] string? propertyName = null)
     {
         ArgumentNullException.ThrowIfNull(callback);
@@ -416,18 +403,16 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given field (which should be the backing
-    /// field for a property). If the value has changed, raises the <see cref="PropertyChanging"/>
-    /// event, updates the field and then raises the <see cref="PropertyChanged"/> event.
-    /// The behavior mirrors that of <see cref="SetProperty{T}(ref T,T,string)"/>, with the difference being that
-    /// this method will also monitor the new value of the property (a generic <see cref="Task"/>) and will also
-    /// raise the <see cref="PropertyChanged"/> again for the target property when it completes.
-    /// This can be used to update bindings observing that <see cref="Task"/> or any of its properties.
-    /// This method and its overload specifically rely on the <see cref="TaskNotifier{T}"/> type, which needs
-    /// to be used in the backing field for the target <see cref="Task"/> property. The field doesn't need to be
-    /// initialized, as this method will take care of doing that automatically. The <see cref="TaskNotifier{T}"/>
-    /// type also includes an implicit operator, so it can be assigned to any <see cref="Task"/> instance directly.
-    /// Here is a sample property declaration using this method:
+    /// 比较给定字段的当前值和新值(应该是属性的后备字段)
+    /// 如果值已更改，引发 <see cref="PropertyChanging"/> 事件，更新字段，
+    /// 然后引发 <see cref="PropertyChanged"/> 事件
+    /// 行为与 <see cref="SetProperty{T}(ref T,T,string)"/> 相同，不同之处在于此方法还将
+    /// 监控属性的新值(一个泛型 <see cref="Task"/>)，并在其完成时再次为该目标属性引发 <see cref="PropertyChanged"/>
+    /// 这可以用于更新绑定到该 <see cref="Task"/> 或其任何属性的绑定
+    /// 此方法及其重载专门依赖 <see cref="TaskNotifier{T}"/> 类型，需要在目标 <see cref="Task"/> 属性的后备字段中使用
+    /// 该字段不需要初始化，因为此方法将自动处理
+    /// <see cref="TaskNotifier{T}"/> 类型还包括一个隐式运算符，因此可以直接分配给任何 <see cref="Task"/> 实例
+    /// 以下是使用此方法的属性声明示例:
     /// <code>
     /// private TaskNotifier&lt;int&gt; myTask;
     ///
@@ -438,16 +423,15 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     /// }
     /// </code>
     /// </summary>
-    /// <typeparam name="T">The type of result for the <see cref="Task{TResult}"/> to set and monitor.</typeparam>
-    /// <param name="taskNotifier">The field notifier to modify.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <typeparam name="T"><see cref="Task{TResult}"/> 的结果类型，用于设置和监视</typeparam>
+    /// <param name="taskNotifier">要修改的字段通知器</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     /// <remarks>
-    /// The <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> events are not raised if the current
-    /// and new value for the target property are the same. The return value being <see langword="true"/> only
-    /// indicates that the new value being assigned to <paramref name="taskNotifier"/> is different than the previous one,
-    /// and it does not mean the new <see cref="Task{TResult}"/> instance passed as argument is in any particular state.
+    /// 如果目标属性的当前值和新值相同，则不会引发 <see cref="PropertyChanging"/> 和 <see cref="PropertyChanged"/> 事件
+    /// 返回值为 <see langword="true"/> 仅表示分配给 <paramref name="taskNotifier"/> 的新值与前一个值不同，
+    /// 并不意味着作为参数传递的新 <see cref="Task{TResult}"/> 实例处于任何特定状态
     /// </remarks>
     protected bool SetPropertyAndNotifyOnCompletion<T>([NotNull] ref TaskNotifier<T>? taskNotifier, Task<T>? newValue, [CallerMemberName] string? propertyName = null)
     {
@@ -455,24 +439,23 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Compares the current and new values for a given field (which should be the backing
-    /// field for a property). If the value has changed, raises the <see cref="PropertyChanging"/>
-    /// event, updates the field and then raises the <see cref="PropertyChanged"/> event.
-    /// This method is just like <see cref="SetPropertyAndNotifyOnCompletion{T}(ref TaskNotifier{T},Task{T},string)"/>,
-    /// with the difference being an extra <see cref="Action{T}"/> parameter with a callback being invoked
-    /// either immediately, if the new task has already completed or is <see langword="null"/>, or upon completion.
+    /// 比较给定字段的当前值和新值(应该是属性的后备字段)
+    /// 如果值已更改，引发 <see cref="PropertyChanging"/> 事件，更新字段，
+    /// 然后引发 <see cref="PropertyChanged"/> 事件
+    /// 此方法与 <see cref="SetPropertyAndNotifyOnCompletion{T}(ref TaskNotifier{T},Task{T},string)"/> 相同，
+    /// 不同之处在于额外的 <see cref="Action{T}"/> 参数，
+    /// 该参数包含一个回调，在新任务已完成或为 <see langword="null"/> 时立即调用，或在完成时调用
     /// </summary>
-    /// <typeparam name="T">The type of result for the <see cref="Task{TResult}"/> to set and monitor.</typeparam>
-    /// <param name="taskNotifier">The field notifier to modify.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="callback">A callback to invoke to update the property value.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <typeparam name="T"><see cref="Task{TResult}"/> 的结果类型，用于设置和监视</typeparam>
+    /// <param name="taskNotifier">要修改的字段通知器</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="callback">用于更新属性值的回调</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     /// <remarks>
-    /// The <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> events are not raised
-    /// if the current and new value for the target property are the same.
+    /// 如果目标属性的当前值和新值相同，则不会引发 <see cref="PropertyChanging"/> 和 <see cref="PropertyChanged"/> 事件
     /// </remarks>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="callback"/> is <see langword="null"/>.</exception>
+    /// <exception cref="System.ArgumentNullException">当 <paramref name="callback"/> 为 <see langword="null"/> 时抛出</exception>
     protected bool SetPropertyAndNotifyOnCompletion<T>([NotNull] ref TaskNotifier<T>? taskNotifier, Task<T>? newValue, Action<Task<T>?> callback, [CallerMemberName] string? propertyName = null)
     {
         ArgumentNullException.ThrowIfNull(callback);
@@ -481,14 +464,14 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// Implements the notification logic for the related methods.
+    /// 为相关方法实现通知逻辑
     /// </summary>
-    /// <typeparam name="TTask">The type of <see cref="Task"/> to set and monitor.</typeparam>
-    /// <param name="taskNotifier">The field notifier.</param>
-    /// <param name="newValue">The property's value after the change occurred.</param>
-    /// <param name="callback">(optional) A callback to invoke to update the property value.</param>
-    /// <param name="propertyName">(optional) The name of the property that changed.</param>
-    /// <returns><see langword="true"/> if the property was changed, <see langword="false"/> otherwise.</returns>
+    /// <typeparam name="TTask">要设置和监视的 <see cref="Task"/> 类型</typeparam>
+    /// <param name="taskNotifier">字段通知器</param>
+    /// <param name="newValue">更改发生后属性的值</param>
+    /// <param name="callback">(可选) 用于更新属性值的回调</param>
+    /// <param name="propertyName">(可选) 发生更改的属性名称</param>
+    /// <returns>如果属性已更改则为 <see langword="true"/>，否则为 <see langword="false"/></returns>
     private bool SetPropertyAndNotifyOnCompletion<TTask>(ITaskNotifier<TTask> taskNotifier, TTask? newValue, Action<TTask?>? callback, [CallerMemberName] string? propertyName = null)
         where TTask : Task
     {
@@ -497,10 +480,9 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
             return false;
         }
 
-        // Check the status of the new task before assigning it to the
-        // target field. This is so that in case the task is either
-        // null or already completed, we can avoid the overhead of
-        // scheduling the method to monitor its completion.
+        // 检查新任务的状态，然后将其分配给目标字段
+        // 这样，如果任务为 null 或已完成，
+        // 我们可以避免监视其完成的开销
         bool isAlreadyCompletedOrNull = newValue?.IsCompleted ?? true;
 
         OnPropertyChanging(propertyName);
@@ -509,12 +491,12 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
 
         OnPropertyChanged(propertyName);
 
-        // If the input task is either null or already completed, we don't need to
-        // execute the additional logic to monitor its completion, so we can just bypass
-        // the rest of the method and return that the field changed here. The return value
-        // does not indicate that the task itself has completed, but just that the property
-        // value itself has changed (ie. the referenced task instance has changed).
-        // This mirrors the return value of all the other synchronous Set methods as well.
+        // 如果输入任务为 null 或已完成，我们不需要执行
+        // 监视其完成的额外逻辑，因此我们可以绕过
+        // 方法的其余部分并返回字段已更改
+        // 这不会指示任务本身已完成，而只是
+        // 属性值本身已更改(即引用的任务实例已更改)
+        // 这与所有其他同步 Set 方法的返回值相匹配
         if (isAlreadyCompletedOrNull)
         {
             if (callback is not null)
@@ -525,20 +507,20 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
             return true;
         }
 
-        // We use a local async function here so that the main method can
-        // remain synchronous and return a value that can be immediately
-        // used by the caller. This mirrors Set<T>(ref T, T, string).
-        // We use an async void function instead of a Task-returning function
-        // so that if a binding update caused by the property change notification
-        // causes a crash, it is immediately reported in the application instead of
-        // the exception being ignored (as the returned task wouldn't be awaited),
-        // which would result in a confusing behavior for users.
+        // 我们在此处使用本地异步函数，以便主方法可以
+        // 保持同步并返回可以立即使用的值
+        // 由调用者。这与 Set<T>(ref T, T, string) 相匹配
+        // 我们使用异步 void 函数而不是返回任务的函数
+        // 因此，如果绑定更新导致的属性更改通知
+        // 导致崩溃，它会在应用程序中立即报告，而不是
+        // 异常被忽略(因为返回的任务不会被等待)，
+        // 这会导致用户的混淆行为
         async void MonitorTask()
         {
-            // Await the task and ignore any exceptions
+            // 等待任务并忽略任何异常
             await newValue!.GetAwaitableWithoutEndValidation();
 
-            // Only notify if the property hasn't changed
+            // 仅在属性未更改时通知
             if (ReferenceEquals(taskNotifier.Task, newValue))
             {
                 OnPropertyChanged(propertyName);
@@ -556,25 +538,25 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// An interface for task notifiers of a specified type.
+    /// 指定类型的任务通知器接口
     /// </summary>
-    /// <typeparam name="TTask">The type of value to store.</typeparam>
+    /// <typeparam name="TTask">要存储的值类型</typeparam>
     private interface ITaskNotifier<TTask>
         where TTask : Task
     {
         /// <summary>
-        /// Gets or sets the wrapped <typeparamref name="TTask"/> value.
+        /// 获取或设置包装的 <typeparamref name="TTask"/> 值
         /// </summary>
         TTask? Task { get; set; }
     }
 
     /// <summary>
-    /// A wrapping class that can hold a <see cref="Task"/> value.
+    /// 可以保存 <see cref="Task"/> 值的包装类
     /// </summary>
     protected sealed class TaskNotifier : ITaskNotifier<Task>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TaskNotifier"/> class.
+        /// 初始化 <see cref="TaskNotifier"/> 类的新实例
         /// </summary>
         internal TaskNotifier()
         {
@@ -590,9 +572,9 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
         }
 
         /// <summary>
-        /// Unwraps the <see cref="Task"/> value stored in the current instance.
+        /// 解包当前实例中存储的 <see cref="Task"/> 值
         /// </summary>
-        /// <param name="notifier">The input <see cref="TaskNotifier{TTask}"/> instance.</param>
+        /// <param name="notifier">输入的 <see cref="TaskNotifier{TTask}"/> 实例</param>
         public static implicit operator Task?(TaskNotifier? notifier)
         {
             return notifier?.task;
@@ -600,13 +582,13 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
     }
 
     /// <summary>
-    /// A wrapping class that can hold a <see cref="Task{T}"/> value.
+    /// 可以保存 <see cref="Task{T}"/> 值的包装类
     /// </summary>
-    /// <typeparam name="T">The type of value for the wrapped <see cref="Task{T}"/> instance.</typeparam>
+    /// <typeparam name="T">用于包装的 <see cref="Task{T}"/> 实例的值类型</typeparam>
     protected sealed class TaskNotifier<T> : ITaskNotifier<Task<T>>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TaskNotifier{TTask}"/> class.
+        /// 初始化 <see cref="TaskNotifier{TTask}"/> 类的新实例
         /// </summary>
         internal TaskNotifier()
         {
@@ -622,9 +604,9 @@ public abstract class ObservableObject : INotifyPropertyChanged, INotifyProperty
         }
 
         /// <summary>
-        /// Unwraps the <see cref="Task{T}"/> value stored in the current instance.
+        /// 解包当前实例中存储的 <see cref="Task{T}"/> 值
         /// </summary>
-        /// <param name="notifier">The input <see cref="TaskNotifier{TTask}"/> instance.</param>
+        /// <param name="notifier">输入的 <see cref="TaskNotifier{TTask}"/> 实例</param>
         public static implicit operator Task<T>?(TaskNotifier<T>? notifier)
         {
             return notifier?.task;

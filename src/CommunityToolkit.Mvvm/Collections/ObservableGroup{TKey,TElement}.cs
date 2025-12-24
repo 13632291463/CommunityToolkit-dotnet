@@ -13,20 +13,20 @@ using CommunityToolkit.Mvvm.Collections.Internals;
 namespace CommunityToolkit.Mvvm.Collections;
 
 /// <summary>
-/// An observable group.
-/// It associates a <see cref="Key"/> to an <see cref="ObservableCollection{T}"/>.
+/// 一个可观察的组
+/// 它将 <see cref="Key"/> 与 <see cref="ObservableCollection{T}"/> 关联起来
 /// </summary>
-/// <typeparam name="TKey">The type of the group key.</typeparam>
-/// <typeparam name="TElement">The type of elements in the group.</typeparam>
+/// <typeparam name="TKey">组键的类型</typeparam>
+/// <typeparam name="TElement">组中元素的类型</typeparam>
 [DebuggerDisplay("Key = {Key}, Count = {Count}")]
 public sealed class ObservableGroup<TKey, TElement> : ObservableCollection<TElement>, IReadOnlyObservableGroup<TKey, TElement>
     where TKey : notnull
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ObservableGroup{TKey, TValue}"/> class.
+    /// 初始化 <see cref="ObservableGroup{TKey, TValue}"/> 类的新实例
     /// </summary>
-    /// <param name="key">The key for the group.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="key"/> is <see langword="null"/>.</exception>
+    /// <param name="key">组的键</param>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public ObservableGroup(TKey key)
     {
         ArgumentNullException.For<TKey>.ThrowIfNull(key);
@@ -35,10 +35,10 @@ public sealed class ObservableGroup<TKey, TElement> : ObservableCollection<TElem
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ObservableGroup{TKey, TValue}"/> class.
+    /// 初始化 <see cref="ObservableGroup{TKey, TValue}"/> 类的新实例
     /// </summary>
-    /// <param name="grouping">The grouping to fill the group.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="grouping"/> is <see langword="null"/>.</exception>
+    /// <param name="grouping">用于填充组的分组</param>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="grouping"/> 为 <see langword="null"/> 则抛出异常</exception>
     public ObservableGroup(IGrouping<TKey, TElement> grouping)
         : base(grouping)
     {
@@ -46,11 +46,11 @@ public sealed class ObservableGroup<TKey, TElement> : ObservableCollection<TElem
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ObservableGroup{TKey, TValue}"/> class.
+    /// 初始化 <see cref="ObservableGroup{TKey, TValue}"/> 类的新实例
     /// </summary>
-    /// <param name="key">The key for the group.</param>
-    /// <param name="collection">The initial collection of data to add to the group.</param>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="key"/> or <paramref name="collection"/> are <see langword="null"/>.</exception>
+    /// <param name="key">组的键</param>
+    /// <param name="collection">要添加到组中的初始数据集合</param>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="key"/> 或 <paramref name="collection"/> 为 <see langword="null"/> 则抛出异常</exception>
     public ObservableGroup(TKey key, IEnumerable<TElement> collection)
         : base(collection)
     {
@@ -62,9 +62,9 @@ public sealed class ObservableGroup<TKey, TElement> : ObservableCollection<TElem
     private TKey key;
 
     /// <summary>
-    /// Gets or sets the key of the group.
+    /// 获取或设置组的键
     /// </summary>
-    /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="value"/> is <see langword="null"/>.</exception>
+    /// <exception cref="System.ArgumentNullException">如果 <paramref name="value"/> 为 <see langword="null"/> 则抛出异常</exception>
     public TKey Key
     {
         get => this.key;
@@ -82,10 +82,10 @@ public sealed class ObservableGroup<TKey, TElement> : ObservableCollection<TElem
     }
 
     /// <summary>
-    /// Tries to get the underlying <see cref="List{T}"/> instance, if present.
+    /// 尝试获取底层的 <see cref="List{T}"/> 实例（如果存在）
     /// </summary>
-    /// <param name="list">The resulting <see cref="List{T}"/>, if one was in use.</param>
-    /// <returns>Whether or not a <see cref="List{T}"/> instance has been found.</returns>
+    /// <param name="list">如果使用了 <see cref="List{T}"/>，则为结果</param>
+    /// <returns>是否找到了 <see cref="List{T}"/> 实例</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool TryGetList([NotNullWhen(true)] out List<TElement>? list)
     {
