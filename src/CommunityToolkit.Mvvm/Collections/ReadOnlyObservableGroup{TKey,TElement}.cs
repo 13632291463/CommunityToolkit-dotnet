@@ -17,7 +17,7 @@ public sealed class ReadOnlyObservableGroup<TKey, TElement> : ReadOnlyObservable
     where TKey : notnull
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReadOnlyObservableGroup{TKey, TValue}"/> class.
+    /// 初始化 <see cref="ReadOnlyObservableGroup{TKey, TValue}"/> 类的新实例.
     /// </summary>
     /// <param name="key">The key of the group.</param>
     /// <param name="collection">The collection of items to add in the group.</param>
@@ -25,19 +25,21 @@ public sealed class ReadOnlyObservableGroup<TKey, TElement> : ReadOnlyObservable
     public ReadOnlyObservableGroup(TKey key, ObservableCollection<TElement> collection)
         : base(collection)
     {
+        // 验证键不为null
         ArgumentNullException.For<TKey>.ThrowIfNull(key);
 
         Key = key;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReadOnlyObservableGroup{TKey, TValue}"/> class.
+    /// 初始化 <see cref="ReadOnlyObservableGroup{TKey, TValue}"/> 类的新实例.
     /// </summary>
     /// <param name="group">The <see cref="ObservableGroup{TKey, TValue}"/> to wrap.</param>
     /// <exception cref="System.ArgumentNullException">Thrown if <paramref name="group"/> is <see langword="null"/>.</exception>
     public ReadOnlyObservableGroup(ObservableGroup<TKey, TElement> group)
         : base(group)
     {
+        // 从传入的ObservableGroup获取键
         Key = group.Key;
     }
 

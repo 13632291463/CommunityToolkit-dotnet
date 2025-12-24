@@ -12,20 +12,20 @@ using System.Runtime.CompilerServices;
 namespace CommunityToolkit.Mvvm.Collections;
 
 /// <summary>
-/// The extensions methods to simplify the usage of <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+/// 用于简化 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 使用的扩展方法
 /// </summary>
 public static class ObservableGroupedCollectionExtensions
 {
     /// <summary>
-    /// Returns the first group with <paramref name="key"/> key.
+    /// 返回具有指定键的第一个组
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group to query.</param>
-    /// <returns>The first group matching <paramref name="key"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
-    /// <exception cref="InvalidOperationException">The target group does not exist.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">要查询的组的键</param>
+    /// <returns>与 <paramref name="key"/> 匹配的第一个组</returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
+    /// <exception cref="InvalidOperationException">目标组不存在</exception>
     public static ObservableGroup<TKey, TElement> FirstGroupByKey<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key)
         where TKey : notnull
     {
@@ -49,26 +49,25 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Returns the first group with <paramref name="key"/> key or <see langword="null"/> if not found.
+    /// 返回具有指定键的第一个组，如果未找到则返回 <see langword="null"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group to query.</param>
-    /// <returns>The first group matching <paramref name="key"/> or <see langword="null"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">要查询的组的键</param>
+    /// <returns>与 <paramref name="key"/> 匹配的第一个组或 <see langword="null"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement>? FirstGroupByKeyOrDefault<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key)
         where TKey : notnull
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.For<TKey>.ThrowIfNull(key);
 
-        // This pattern is used extensively in this file, with many of the public APIs having a first loop on the retrieved
-        // list, and then a fallback one sometimes with the same logic, but on the collection itself. This is done as an
-        // optimization: if a list is available, we can iterate on it directly, which will use List<T>.Enumerator and avoid
-        // allocations (the enumerator is a struct), additional indirections (the enumerator wraps the list instead of the
-        // outer collection, and additional overhead (using the value enumerator avoids the interface stub dispatches).
-        // Because of this, duplicate logic below is intentional and not actually duplicate, as it results in different code.
+        // 这个模式在此文件中广泛使用，许多公共 API 都有一个先循环检索列表，然后是回退循环，
+        // 有时具有相同逻辑，但针对集合本身。这样做是为了优化：如果列表可用，我们可以直接迭代它，
+        // 这将使用 List<T>.Enumerator 并避免分配（枚举器是结构体）、额外的间接（枚举器包装列表而不是
+        // 外部集合）、以及额外开销（使用值枚举器避免接口存根调度）。
+        // 因此，以下重复逻辑是有意的，并非实际重复，因为它会导致不同的代码结果。
         if (source.TryGetList(out List<ObservableGroup<TKey, TElement>>? list))
         {
             foreach (ObservableGroup<TKey, TElement> group in list)
@@ -92,14 +91,14 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-value <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键值 <see cref="ObservableGroup{TKey, TElement}"/> 项添加到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group to add.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">要添加的组的键</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> AddGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key)
         where TKey : notnull
     {
@@ -114,14 +113,14 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-collection <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键集合 <see cref="ObservableGroup{TKey, TElement}"/> 项添加到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="grouping">The group of items to add.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="grouping"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="grouping">要添加的项目组</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="grouping"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> AddGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, IGrouping<TKey, TElement> grouping)
         where TKey : notnull
     {
@@ -136,15 +135,15 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-collection <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键集合 <see cref="ObservableGroup{TKey, TElement}"/> 项添加到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group where <paramref name="collection"/> will be added.</param>
-    /// <param name="collection">The collection to add.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TElement}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/>, <paramref name="key"/> or <paramref name="collection"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">将添加 <paramref name="collection"/> 的组的键</param>
+    /// <param name="collection">要添加的集合</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TElement}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/>、<paramref name="key"/> 或 <paramref name="collection"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> AddGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key, IEnumerable<TElement> collection)
         where TKey : notnull
     {
@@ -160,14 +159,14 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-value <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键值 <see cref="ObservableGroup{TKey, TElement}"/> 项插入到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group to add.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">要添加的组的键</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key)
         where TKey : notnull
     {
@@ -180,6 +179,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in list)
             {
+                // 比较键值，找到合适的插入位置
                 if (Comparer<TKey>.Default.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -202,6 +202,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in source)
             {
+                // 比较键值，找到合适的插入位置
                 if (Comparer<TKey>.Default.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -221,14 +222,14 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-value <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键值 <see cref="ObservableGroup{TKey, TElement}"/> 项插入到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="grouping">The group of items to add.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="grouping"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="grouping">要添加的项目组</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="grouping"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, IGrouping<TKey, TElement> grouping)
         where TKey : notnull
     {
@@ -241,6 +242,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in list)
             {
+                // 比较键值，找到合适的插入位置
                 if (Comparer<TKey>.Default.Compare(grouping.Key, group.Key) < 0)
                 {
                     break;
@@ -263,6 +265,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in source)
             {
+                // 比较键值，找到合适的插入位置
                 if (Comparer<TKey>.Default.Compare(grouping.Key, group.Key) < 0)
                 {
                     break;
@@ -282,15 +285,15 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-value <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键值 <see cref="ObservableGroup{TKey, TElement}"/> 项插入到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group where <paramref name="collection"/> will be added.</param>
-    /// <param name="collection">The collection to add.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/>, <paramref name="key"/> or <paramref name="collection"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">将添加 <paramref name="collection"/> 的组的键</param>
+    /// <param name="collection">要添加的集合</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/>、<paramref name="key"/> 或 <paramref name="collection"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key, IEnumerable<TElement> collection)
         where TKey : notnull
     {
@@ -304,6 +307,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in list)
             {
+                // 比较键值，找到合适的插入位置
                 if (Comparer<TKey>.Default.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -326,6 +330,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in source)
             {
+                // 比较键值，找到合适的插入位置
                 if (Comparer<TKey>.Default.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -345,15 +350,15 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-value <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键值 <see cref="ObservableGroup{TKey, TElement}"/> 项插入到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group to add.</param>
-    /// <param name="comparer">The <see cref="IComparer{T}"/> instance to insert <typeparamref name="TKey"/> at the right position.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/>, <paramref name="key"/> or <paramref name="comparer"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">要添加的组的键</param>
+    /// <param name="comparer">用于在正确位置插入 <typeparamref name="TKey"/> 的 <see cref="IComparer{T}"/> 实例</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/>、<paramref name="key"/> 或 <paramref name="comparer"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key, IComparer<TKey> comparer)
         where TKey : notnull
     {
@@ -367,6 +372,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in list)
             {
+                // 使用指定比较器比较键值，找到合适的插入位置
                 if (comparer.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -389,6 +395,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in source)
             {
+                // 使用指定比较器比较键值，找到合适的插入位置
                 if (comparer.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -408,15 +415,15 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-value <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键值 <see cref="ObservableGroup{TKey, TElement}"/> 项插入到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="grouping">The group of items to add.</param>
-    /// <param name="comparer">The <see cref="IComparer{T}"/> instance to insert <typeparamref name="TKey"/> at the right position.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/>, <paramref name="grouping"/> or <paramref name="comparer"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="grouping">要添加的项目组</param>
+    /// <param name="comparer">用于在正确位置插入 <typeparamref name="TKey"/> 的 <see cref="IComparer{T}"/> 实例</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/>、<paramref name="grouping"/> 或 <paramref name="comparer"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, IGrouping<TKey, TElement> grouping, IComparer<TKey> comparer)
         where TKey : notnull
     {
@@ -430,6 +437,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in list)
             {
+                // 使用指定比较器比较键值，找到合适的插入位置
                 if (comparer.Compare(grouping.Key, group.Key) < 0)
                 {
                     break;
@@ -452,6 +460,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in source)
             {
+                // 使用指定比较器比较键值，找到合适的插入位置
                 if (comparer.Compare(grouping.Key, group.Key) < 0)
                 {
                     break;
@@ -471,16 +480,16 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a key-value <see cref="ObservableGroup{TKey, TElement}"/> item into a target <see cref="ObservableGroupedCollection{TKey, TElement}"/>.
+    /// 将键值 <see cref="ObservableGroup{TKey, TElement}"/> 项插入到目标 <see cref="ObservableGroupedCollection{TKey, TElement}"/>
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group where <paramref name="collection"/> will be added.</param>
-    /// <param name="comparer">The <see cref="IComparer{T}"/> instance to insert <typeparamref name="TKey"/> at the right position.</param>
-    /// <param name="collection">The collection to add.</param>
-    /// <returns>The added <see cref="ObservableGroup{TKey, TValue}"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/>, <paramref name="key"/>, <paramref name="comparer"/> or <paramref name="collection"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">将添加 <paramref name="collection"/> 的组的键</param>
+    /// <param name="comparer">用于在正确位置插入 <typeparamref name="TKey"/> 的 <see cref="IComparer{T}"/> 实例</param>
+    /// <param name="collection">要添加的集合</param>
+    /// <returns>添加的 <see cref="ObservableGroup{TKey, TValue}"/></returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/>、<paramref name="key"/>、<paramref name="comparer"/> 或 <paramref name="collection"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertGroup<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key, IComparer<TKey> comparer, IEnumerable<TElement> collection)
         where TKey : notnull
     {
@@ -495,6 +504,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in list)
             {
+                // 使用指定比较器比较键值，找到合适的插入位置
                 if (comparer.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -517,6 +527,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (ObservableGroup<TKey, TElement> group in source)
             {
+                // 使用指定比较器比较键值，找到合适的插入位置
                 if (comparer.Compare(key, group.Key) < 0)
                 {
                     break;
@@ -536,16 +547,16 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Add <paramref name="item"/> into the first group with <paramref name="key"/> key.
-    /// If the group does not exist, it will be added.
+    /// 将 <paramref name="item"/> 添加到具有 <paramref name="key"/> 键的第一个组中
+    /// 如果组不存在，则将添加该组
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group where the <paramref name="item"/> should be added.</param>
-    /// <param name="item">The item to add.</param>
-    /// <returns>The instance of the <see cref="ObservableGroup{TKey, TElement}"/> which will receive the value. It will either be an existing group or a new group.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">应将 <paramref name="item"/> 添加到的组的键</param>
+    /// <param name="item">要添加的项目</param>
+    /// <returns><see cref="ObservableGroup{TKey, TElement}"/> 的实例，它将接收值。它将是现有组或新组</returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> AddItem<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key, TElement item)
         where TKey : notnull
     {
@@ -569,15 +580,15 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Insert <paramref name="item"/> into the first group with <paramref name="key"/> key.
+    /// 将 <paramref name="item"/> 插入到具有 <paramref name="key"/> 键的第一个组中
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group where to insert <paramref name="item"/>.</param>
-    /// <param name="item">The item to add.</param>
-    /// <returns>The instance of the <see cref="ObservableGroup{TKey, TElement}"/> which will receive the value.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">要插入 <paramref name="item"/> 的组的键</param>
+    /// <param name="item">要添加的项目</param>
+    /// <returns>将接收值的 <see cref="ObservableGroup{TKey, TElement}"/> 的实例</returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertItem<TKey, TElement>(this ObservableGroupedCollection<TKey, TElement> source, TKey key, TElement item)
         where TKey : notnull
     {
@@ -596,6 +607,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (TElement element in list)
             {
+                // 比较元素，找到合适的插入位置
                 if (Comparer<TElement>.Default.Compare(item, element) < 0)
                 {
                     break;
@@ -615,6 +627,7 @@ public static class ObservableGroupedCollectionExtensions
 
                 foreach (TElement element in source)
                 {
+                    // 比较元素，找到合适的插入位置
                     if (Comparer<TElement>.Default.Compare(item, element) < 0)
                     {
                         break;
@@ -633,17 +646,17 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Insert <paramref name="item"/> into the first group with <paramref name="key"/> key.
+    /// 将 <paramref name="item"/> 插入到具有 <paramref name="key"/> 键的第一个组中
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TElement">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TElement}"/> instance.</param>
-    /// <param name="key">The key of the group where to insert <paramref name="item"/>.</param>
-    /// <param name="keyComparer">The <see cref="IComparer{T}"/> instance to compare keys.</param>
-    /// <param name="item">The item to add.</param>
-    /// <param name="itemComparer">The <see cref="IComparer{T}"/> instance to compare elements.</param>
-    /// <returns>The instance of the <see cref="ObservableGroup{TKey, TElement}"/> which will receive the value.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/>, <paramref name="key"/>, <paramref name="keyComparer"/> or <paramref name="itemComparer"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TElement">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TElement}"/> 实例</param>
+    /// <param name="key">要插入 <paramref name="item"/> 的组的键</param>
+    /// <param name="keyComparer">用于比较键的 <see cref="IComparer{T}"/> 实例</param>
+    /// <param name="item">要添加的项目</param>
+    /// <param name="itemComparer">用于比较元素的 <see cref="IComparer{T}"/> 实例</param>
+    /// <returns>将接收值的 <see cref="ObservableGroup{TKey, TElement}"/> 的实例</returns>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/>、<paramref name="key"/>、<paramref name="keyComparer"/> 或 <paramref name="itemComparer"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static ObservableGroup<TKey, TElement> InsertItem<TKey, TElement>(
         this ObservableGroupedCollection<TKey, TElement> source,
         TKey key,
@@ -669,6 +682,7 @@ public static class ObservableGroupedCollectionExtensions
 
             foreach (TElement element in list)
             {
+                // 使用指定比较器比较元素，找到合适的插入位置
                 if (itemComparer.Compare(item, element) < 0)
                 {
                     break;
@@ -688,6 +702,7 @@ public static class ObservableGroupedCollectionExtensions
 
                 foreach (TElement element in source)
                 {
+                    // 使用指定比较器比较元素，找到合适的插入位置
                     if (comparer.Compare(item, element) < 0)
                     {
                         break;
@@ -706,14 +721,14 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Remove the first occurrence of the group with <paramref name="key"/> from the <paramref name="source"/> grouped collection.
-    /// It will not do anything if the group does not exist.
+    /// 从 <paramref name="source"/> 分组集合中移除具有 <paramref name="key"/> 的第一个组
+    /// 如果组不存在则不会执行任何操作
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TValue">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TValue}"/> instance.</param>
-    /// <param name="key">The key of the group to remove.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TValue">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TValue}"/> 实例</param>
+    /// <param name="key">要移除的组的键</param>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static void RemoveGroup<TKey, TValue>(this ObservableGroupedCollection<TKey, TValue> source, TKey key)
         where TKey : notnull
     {
@@ -760,16 +775,16 @@ public static class ObservableGroupedCollectionExtensions
     }
 
     /// <summary>
-    /// Remove the first <paramref name="item"/> from the first group with <paramref name="key"/> from the <paramref name="source"/> grouped collection.
-    /// It will not do anything if the group or the item does not exist.
+    /// 从 <paramref name="source"/> 分组集合中移除具有 <paramref name="key"/> 的第一个组中的第一个 <paramref name="item"/>
+    /// 如果组或项目不存在则不会执行任何操作
     /// </summary>
-    /// <typeparam name="TKey">The type of the group key.</typeparam>
-    /// <typeparam name="TValue">The type of the items in the collection.</typeparam>
-    /// <param name="source">The source <see cref="ObservableGroupedCollection{TKey, TValue}"/> instance.</param>
-    /// <param name="key">The key of the group where the <paramref name="item"/> should be removed.</param>
-    /// <param name="item">The item to remove.</param>
-    /// <param name="removeGroupIfEmpty">If true (default value), the group will be removed once it becomes empty.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> or <paramref name="key"/> are <see langword="null"/>.</exception>
+    /// <typeparam name="TKey">组键的类型</typeparam>
+    /// <typeparam name="TValue">集合中项目的类型</typeparam>
+    /// <param name="source">源 <see cref="ObservableGroupedCollection{TKey, TValue}"/> 实例</param>
+    /// <param name="key">应从中移除 <paramref name="item"/> 的组的键</param>
+    /// <param name="item">要移除的项目</param>
+    /// <param name="removeGroupIfEmpty">如果为 true（默认值），则组在变空后将被移除</param>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="source"/> 或 <paramref name="key"/> 为 <see langword="null"/> 则抛出异常</exception>
     public static void RemoveItem<TKey, TValue>(this ObservableGroupedCollection<TKey, TValue> source, TKey key, TValue item, bool removeGroupIfEmpty = true)
         where TKey : notnull
     {
