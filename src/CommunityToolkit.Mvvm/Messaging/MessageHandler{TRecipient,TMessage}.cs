@@ -5,15 +5,15 @@
 namespace CommunityToolkit.Mvvm.Messaging;
 
 /// <summary>
-/// A <see langword="delegate"/> used to represent actions to invoke when a message is received.
-/// The recipient is given as an input argument to allow message registrations to avoid creating
-/// closures: if an instance method on a recipient needs to be invoked it is possible to just
-/// cast the recipient to the right type and then access the local method from that instance.
+/// 用于表示接收消息时要调用的操作的委托类型
+/// 提供接收者作为输入参数是为了允许消息注册避免创建闭包：
+/// 如果需要调用接收者上的实例方法，则可以直接将接收者转换为正确的类型，
+/// 然后从该实例访问本地方法
 /// </summary>
-/// <typeparam name="TRecipient">The type of recipient for the message.</typeparam>
-/// <typeparam name="TMessage">The type of message to receive.</typeparam>
-/// <param name="recipient">The recipient that is receiving the message.</param>
-/// <param name="message">The message being received.</param>
+/// <typeparam name="TRecipient">消息接收者的类型</typeparam>
+/// <typeparam name="TMessage">要接收的消息类型</typeparam>
+/// <param name="recipient">接收消息的接收者</param>
+/// <param name="message">正在接收的消息</param>
 public delegate void MessageHandler<in TRecipient, in TMessage>(TRecipient recipient, TMessage message)
     where TRecipient : class
     where TMessage : class;

@@ -12,22 +12,20 @@ using CommunityToolkit.Mvvm.Messaging.Internals;
 namespace CommunityToolkit.Mvvm.Messaging;
 
 /// <summary>
-/// A class providing a reference implementation for the <see cref="IMessenger"/> interface.
+/// 一个提供 <see cref="IMessenger"/> 接口参考实现的类
 /// </summary>
 /// <remarks>
 /// <para>
-/// This <see cref="IMessenger"/> implementation uses weak references to track the registered
-/// recipients, so it is not necessary to manually unregister them when they're no longer needed.
+/// 此 <see cref="IMessenger"/> 实现使用弱引用来跟踪注册的接收者，因此不需要手动取消注册不再需要的接收者
 /// </para>
 /// <para>
-/// The <see cref="WeakReferenceMessenger"/> type will automatically perform internal trimming when
-/// full GC collections are invoked, so calling <see cref="Cleanup"/> manually is not necessary to
-/// ensure that on average the internal data structures are as trimmed and compact as possible.
+/// <see cref="WeakReferenceMessenger"/> 类型将在调用完整GC收集时自动执行内部修剪，因此无需手动调用 <see cref="Cleanup"/> 来
+/// 确保内部数据结构尽可能精简和紧凑
 /// </para>
 /// </remarks>
 public sealed class WeakReferenceMessenger : IMessenger
 {
-    // This messenger uses the following logic to link stored instances together:
+    // 这个消息传递器使用以下逻辑将存储的实例链接在一起：
     // --------------------------------------------------------------------------------------------------------
     //                          Dictionary2<TToken, MessageHandlerDispatcher?> mapping
     //                                        /                   /             /
@@ -37,60 +35,65 @@ public sealed class WeakReferenceMessenger : IMessenger
     //                /                                    /                         \
     // Dictionary2<Type2, ConditionalWeakTable<object, object?>> recipientsMap;       \___(null if using IRecipient<TMessage>)
     // --------------------------------------------------------------------------------------------------------
-    // Just like in the strong reference variant, each pair of message and token types is used as a key in the
-    // recipients map. In this case, the values in the dictionary are ConditionalWeakTable2<,> instances, that
-    // link each registered recipient to a map of currently registered handlers, through dependent handles. This
-    // ensures that handlers will remain alive as long as their associated recipient is also alive (so there is no
-    // need for users to manually indicate whether a given handler should be kept alive in case it creates a closure).
-    // The value in each conditional table can either be Dictionary2<TToken, MessageHandlerDispatcher> or object. The
-    // first case is used when any token type other than the default Unit type is used, as in this case there could be
-    // multiple handlers for each recipient that need to be tracked separately. In order to invoke all the handlers from
-    // a context where their type parameters is not known, handlers are stored as MessageHandlerDispatcher instances. There
-    // are two possible cases here: either a given instance is of type MessageHandlerDispatcher.For<TRecipient, TMessage>,
-    // or null. The first is the default case: whenever a subscription is done with a MessageHandler<TRecipient, TToken>,
-    // that delegate is wrapped in an instance of this class so that it can keep track internally of the generic context in
-    // use, so that it can be retrieved when the callback is executed. If the subscription is done directly on a recipient
-    // that implements IRecipient<TMessage instead, the dispatcher is null, which just acts as marker. Whenever the broadcast
-    // method finds it, it will just invoke IRecipient<TMessage.Receive directly on the target recipient, which avoids the
-    // extra indirection on dispatch as well as having to allocate an extra wrapper type for the handler. Lastly, there is a
-    // special case when subscriptions are done through the Unit type, meaning when the default channel is in use. In this
-    // case, each recipient only stores a single MessageHandlerDispatcher instance and not a whole dictionary, as there can
-    // only ever be a single handler for each recipient.
+    // 与强引用变体类似，每对消息和令牌类型都用作接收者映射中的键
+    // 在这种情况下，字典中的值是 ConditionalWeakTable2<,> 实例，它们
+    // 通过依赖句柄将每个注册的接收者链接到当前注册的处理程序映射。这
+    // 确保只要它们关联的接收者仍然存活，处理程序就会保持存活（因此用户无需手动指示
+    // 是否应保留给定处理程序以防它创建闭包）。
+    // 每个条件表中的值可以是 Dictionary2<TToken, MessageHandlerDispatcher> 或 object。第一个
+    // 情况用于使用除默认 Unit 类型之外的任何令牌类型时，因为在这种情况下，
+    // 每个接收者可能需要单独跟踪多个处理程序。为了在不知道其类型参数的上下文中调用所有处理程序，
+    // 处理程序存储为 MessageHandlerDispatcher 实例。有两种可能的情况：
+    // 一个实例是 MessageHandlerDispatcher.For<TRecipient, TMessage> 类型，或者为 null。第一个是默认情况：
+    // 每当通过 MessageHandler<TRecipient, TToken> 进行订阅时，该委托被包装在该类的实例中，
+    // 以便它可以在内部跟踪使用的泛型上下文，以便可以在执行回调时检索它。如果订阅直接在实现
+    // IRecipient<TMessage 的接收者上完成，则调度程序为 null，这只是一个标记。每当广播
+    // 方法找到它时，它将直接在目标接收者上调用 IRecipient<TMessage.Receive，这避免了调度时的
+    // 额外间接引用以及为处理程序分配额外包装类型的需要。最后，当通过 Unit 类型进行订阅时有特殊情况，
+    // 这意味着使用默认通道时。在这种情况下，每个接收者只存储一个 MessageHandlerDispatcher 实例，而不是整个字典，因为
+    // 每个接收者只能有一个处理程序。
 
     /// <summary>
-    /// The map of currently registered recipients for all message types.
+    /// 当前注册的所有消息类型的接收者映射表
     /// </summary>
     private readonly Dictionary2<Type2, ConditionalWeakTable2<object, object?>> recipientsMap = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WeakReferenceMessenger"/> class.
+    /// 初始化 <see cref="WeakReferenceMessenger"/> 类的新实例
     /// </summary>
     public WeakReferenceMessenger()
     {
-        // Proxy function for the GC callback. This needs to be static and to take the target instance as
-        // an input parameter in order to avoid rooting it from the Gen2GcCallback object invoking it.
+        // GC 回调的代理函数。这需要是静态的并将目标实例作为
+        // 输入参数，以避免 Gen2GcCallback 对象调用它时将其固定
         static void Gen2GcCallbackProxy(object target)
         {
             ((WeakReferenceMessenger)target).CleanupWithNonBlockingLock();
         }
 
-        // Register an automatic GC callback to trigger a non-blocking cleanup. This will ensure that the
-        // current messenger instance is trimmed and without leftover recipient maps that are no longer used.
-        // This is necessary (as in, some form of cleanup, either explicit or automatic like in this case)
-        // because the ConditionalWeakTable<TKey, TValue> instances will just remove key-value pairs on their
-        // own as soon as a key (ie. a recipient) is collected, causing their own keys (ie. the Type2 instances
-        // mapping to each conditional table for a pair of message and token types) to potentially remain in the
-        // root mapping structure but without any remaining recipients actually registered there, which just
-        // adds unnecessary overhead when trying to enumerate recipients during broadcasting operations later on.
+        // 注册自动 GC 回调以触发非阻塞清理。这将确保
+        // 当前 messenger 实例被修剪且没有未使用的剩余接收者映射
+        // 这是必要的（以某种形式的清理，无论是显式的还是像这样自动的）
+        // 因为 ConditionalWeakTable<TKey, TValue> 实例将在密钥（即接收者）被收集时立即移除键值对，
+        // 导致它们自己的密钥（即映射每个消息和令牌类型的条件表的 Type2 实例）
+        // 在根映射结构中保留但没有实际注册的接收者，这只会
+        // 在以后的广播操作中枚举接收者时增加不必要的开销
         Gen2GcCallback.Register(Gen2GcCallbackProxy, this);
     }
 
     /// <summary>
-    /// Gets the default <see cref="WeakReferenceMessenger"/> instance.
+    /// 获取默认的 <see cref="WeakReferenceMessenger"/> 实例
     /// </summary>
     public static WeakReferenceMessenger Default { get; } = new();
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 检查指定的接收者是否已注册了特定消息和令牌类型
+    /// </summary>
+    /// <typeparam name="TMessage">消息类型</typeparam>
+    /// <typeparam name="TToken">令牌类型，必须实现 IEquatable&lt;TToken&gt;</typeparam>
+    /// <param name="recipient">要检查的接收者对象</param>
+    /// <param name="token">用于确定接收通道的令牌</param>
+    /// <returns>如果接收者已注册，则返回 true；否则返回 false</returns>
+    /// <exception cref="ArgumentNullException">当接收者或令牌为 null 时抛出</exception>
     public bool IsRegistered<TMessage, TToken>(object recipient, TToken token)
         where TMessage : class
         where TToken : IEquatable<TToken>
@@ -102,27 +105,36 @@ public sealed class WeakReferenceMessenger : IMessenger
         {
             Type2 type2 = new(typeof(TMessage), typeof(TToken));
 
-            // Get the conditional table associated with the target recipient, for the current pair
-            // of token and message types. If it exists, check if there is a matching token.
+            // 获取与目标接收者关联的条件表，用于当前的令牌和消息类型对
+            // 如果存在，则检查是否有匹配的令牌
             if (!this.recipientsMap.TryGetValue(type2, out ConditionalWeakTable2<object, object?>? table))
             {
                 return false;
             }
 
-            // Special case for unit tokens
+            // Unit 令牌的特殊情况
             if (typeof(TToken) == typeof(Unit))
             {
                 return table.TryGetValue(recipient, out _);
             }
 
-            // Custom token type, so each recipient has an associated map
+            // 自定义令牌类型，因此每个接收者都有一个关联的映射
             return
                 table.TryGetValue(recipient, out object? mapping) &&
                 Unsafe.As<Dictionary2<TToken, object?>>(mapping!).ContainsKey(token);
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 为指定接收者注册消息处理程序
+    /// </summary>
+    /// <typeparam name="TRecipient">接收者类型</typeparam>
+    /// <typeparam name="TMessage">消息类型</typeparam>
+    /// <typeparam name="TToken">令牌类型，必须实现 IEquatable&lt;TToken&gt;</typeparam>
+    /// <param name="recipient">将接收消息的接收者</param>
+    /// <param name="token">用于确定接收通道的令牌</param>
+    /// <param name="handler">消息处理程序委托</param>
+    /// <exception cref="ArgumentNullException">当接收者、令牌或处理程序为 null 时抛出</exception>
     public void Register<TRecipient, TMessage, TToken>(TRecipient recipient, TToken token, MessageHandler<TRecipient, TMessage> handler)
         where TRecipient : class
         where TMessage : class
@@ -136,17 +148,17 @@ public sealed class WeakReferenceMessenger : IMessenger
     }
 
     /// <summary>
-    /// Registers a recipient for a given type of message.
+    /// 为给定消息类型注册接收者
     /// </summary>
-    /// <typeparam name="TMessage">The type of message to receive.</typeparam>
-    /// <typeparam name="TToken">The type of token to use to pick the messages to receive.</typeparam>
-    /// <param name="recipient">The recipient that will receive the messages.</param>
-    /// <param name="token">A token used to determine the receiving channel to use.</param>
-    /// <exception cref="InvalidOperationException">Thrown when trying to register the same message twice.</exception>
+    /// <typeparam name="TMessage">要接收的消息类型</typeparam>
+    /// <typeparam name="TToken">用于选择要接收的消息的令牌类型</typeparam>
+    /// <param name="recipient">将接收消息的接收者</param>
+    /// <param name="token">用于确定接收通道的令牌</param>
+    /// <exception cref="InvalidOperationException">尝试重复注册相同消息时抛出</exception>
     /// <remarks>
-    /// This method is a variation of <see cref="Register{TRecipient, TMessage, TToken}(TRecipient, TToken, MessageHandler{TRecipient, TMessage})"/>
-    /// that is specialized for recipients implementing <see cref="IRecipient{TMessage}"/>. See more comments at the top of this type, as well as
-    /// within <see cref="Send{TMessage, TToken}(TMessage, TToken)"/> and in the <see cref="MessageHandlerDispatcher"/> types.
+    /// 此方法是 <see cref="Register{TRecipient, TMessage, TToken}(TRecipient, TToken, MessageHandler{TRecipient, TMessage})"/> 的变体
+    /// 专门用于实现 <see cref="IRecipient{TMessage}"/> 的接收者。请参阅此类顶部的更多注释，以及
+    /// <see cref="Send{TMessage, TToken}(TMessage, TToken)"/> 和 <see cref="MessageHandlerDispatcher"/> 类型中的注释
     /// </remarks>
     internal void Register<TMessage, TToken>(IRecipient<TMessage> recipient, TToken token)
         where TMessage : class
@@ -156,14 +168,14 @@ public sealed class WeakReferenceMessenger : IMessenger
     }
 
     /// <summary>
-    /// Registers a recipient for a given type of message.
+    /// 为给定消息类型注册接收者
     /// </summary>
-    /// <typeparam name="TMessage">The type of message to receive.</typeparam>
-    /// <typeparam name="TToken">The type of token to use to pick the messages to receive.</typeparam>
-    /// <param name="recipient">The recipient that will receive the messages.</param>
-    /// <param name="token">A token used to determine the receiving channel to use.</param>
-    /// <param name="dispatcher">The input <see cref="MessageHandlerDispatcher"/> instance to register, or null.</param>
-    /// <exception cref="InvalidOperationException">Thrown when trying to register the same message twice.</exception>
+    /// <typeparam name="TMessage">要接收的消息类型</typeparam>
+    /// <typeparam name="TToken">用于选择要接收的消息的令牌类型</typeparam>
+    /// <param name="recipient">将接收消息的接收者</param>
+    /// <param name="token">用于确定接收通道的令牌</param>
+    /// <param name="dispatcher">输入的 <see cref="MessageHandlerDispatcher"/> 实例，或 null</param>
+    /// <exception cref="InvalidOperationException">尝试重复注册相同消息时抛出</exception>
     private void Register<TMessage, TToken>(object recipient, TToken token, MessageHandlerDispatcher? dispatcher)
         where TMessage : class
         where TToken : IEquatable<TToken>
@@ -172,12 +184,12 @@ public sealed class WeakReferenceMessenger : IMessenger
         {
             Type2 type2 = new(typeof(TMessage), typeof(TToken));
 
-            // Get the conditional table for the pair of type arguments, or create it if it doesn't exist
+            // 获取类型参数对的条件表，如果不存在则创建它
             ref ConditionalWeakTable2<object, object?>? mapping = ref this.recipientsMap.GetOrAddValueRef(type2);
 
             mapping ??= new ConditionalWeakTable2<object, object?>();
 
-            // Fast path for unit tokens
+            // Unit 令牌的快速路径
             if (typeof(TToken) == typeof(Unit))
             {
                 if (!mapping.TryAdd(recipient, dispatcher))
@@ -187,10 +199,10 @@ public sealed class WeakReferenceMessenger : IMessenger
             }
             else
             {
-                // Get or create the handlers dictionary for the target recipient
+                // 为目标接收者获取或创建处理程序字典
                 Dictionary2<TToken, object?>? map = Unsafe.As<Dictionary2<TToken, object?>>(mapping.GetValue(recipient, static _ => new Dictionary2<TToken, object?>())!);
 
-                // Add the new registration entry
+                // 添加新的注册条目
                 ref object? registeredHandler = ref map.GetOrAddValueRef(token);
 
                 if (registeredHandler is not null)
@@ -198,13 +210,17 @@ public sealed class WeakReferenceMessenger : IMessenger
                     ThrowInvalidOperationExceptionForDuplicateRegistration();
                 }
 
-                // Store the input handler
+                // 存储输入的处理程序
                 registeredHandler = dispatcher;
             }
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 取消注册指定接收者的所有消息订阅
+    /// </summary>
+    /// <param name="recipient">要取消注册的接收者对象</param>
+    /// <exception cref="ArgumentNullException">当接收者为 null 时抛出</exception>
     public void UnregisterAll(object recipient)
     {
         ArgumentNullException.ThrowIfNull(recipient);
@@ -213,9 +229,9 @@ public sealed class WeakReferenceMessenger : IMessenger
         {
             Dictionary2<Type2, ConditionalWeakTable2<object, object?>>.Enumerator enumerator = this.recipientsMap.GetEnumerator();
 
-            // Traverse all the existing conditional tables and remove all the ones
-            // with the target recipient as key. We don't perform a cleanup here,
-            // as that is responsibility of a separate method defined below.
+            // 遍历所有现有的条件表并移除所有
+            // 以目标接收者为键的条目。我们在此处不执行清理，
+            // 因为那是下面定义的单独方法的职责
             while (enumerator.MoveNext())
             {
                 _ = enumerator.GetValue().Remove(recipient);
@@ -223,15 +239,21 @@ public sealed class WeakReferenceMessenger : IMessenger
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 取消注册指定接收者的特定令牌的所有消息订阅
+    /// </summary>
+    /// <typeparam name="TToken">令牌类型，必须实现 IEquatable&lt;TToken&gt;</typeparam>
+    /// <param name="recipient">要取消注册的接收者对象</param>
+    /// <param name="token">要取消注册的令牌</param>
+    /// <exception cref="ArgumentNullException">当接收者或令牌为 null 时抛出</exception>
     public void UnregisterAll<TToken>(object recipient, TToken token)
         where TToken : IEquatable<TToken>
     {
         ArgumentNullException.ThrowIfNull(recipient);
         ArgumentNullException.For<TToken>.ThrowIfNull(token);
 
-        // This method is never called with the unit type. See more details in
-        // the comments in the corresponding method in StrongReferenceMessenger.
+        // 此方法从不使用 Unit 类型调用。请参阅 StrongReferenceMessenger 中相应方法的注释
+        // 了解更多详细信息
         if (typeof(TToken) == typeof(Unit))
         {
             throw new NotImplementedException();
@@ -241,9 +263,9 @@ public sealed class WeakReferenceMessenger : IMessenger
         {
             Dictionary2<Type2, ConditionalWeakTable2<object, object?>>.Enumerator enumerator = this.recipientsMap.GetEnumerator();
 
-            // Same as above, with the difference being that this time we only go through
-            // the conditional tables having a matching token type as key, and that we
-            // only try to remove handlers with a matching token, if any.
+            // 与上面相同，区别在于这次我们只遍历
+            // 具有匹配令牌类型的键的条件表，并且只尝试移除
+            // 具有匹配令牌的处理程序（如果存在）
             while (enumerator.MoveNext())
             {
                 if (enumerator.GetKey().TToken == typeof(TToken))
@@ -257,7 +279,14 @@ public sealed class WeakReferenceMessenger : IMessenger
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 取消注册指定接收者和令牌的特定消息类型
+    /// </summary>
+    /// <typeparam name="TMessage">消息类型</typeparam>
+    /// <typeparam name="TToken">令牌类型，必须实现 IEquatable&lt;TToken&gt;</typeparam>
+    /// <param name="recipient">要取消注册的接收者对象</param>
+    /// <param name="token">用于确定接收通道的令牌</param>
+    /// <exception cref="ArgumentNullException">当接收者或令牌为 null 时抛出</exception>
     public void Unregister<TMessage, TToken>(object recipient, TToken token)
         where TMessage : class
         where TToken : IEquatable<TToken>
@@ -269,8 +298,8 @@ public sealed class WeakReferenceMessenger : IMessenger
         {
             Type2 type2 = new(typeof(TMessage), typeof(TToken));
 
-            // Get the target mapping table for the combination of message and token types,
-            // and remove the handler with a matching token (the entire map), if present.
+            // 获取消息和令牌类型的组合的目标映射表，
+            // 并移除具有匹配令牌的处理程序（整个映射），如果存在
             if (this.recipientsMap.TryGetValue(type2, out ConditionalWeakTable2<object, object?>? value))
             {
                 if (typeof(TToken) == typeof(Unit))
@@ -285,7 +314,15 @@ public sealed class WeakReferenceMessenger : IMessenger
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 向所有注册的接收者发送消息
+    /// </summary>
+    /// <typeparam name="TMessage">消息类型</typeparam>
+    /// <typeparam name="TToken">令牌类型，必须实现 IEquatable&lt;TToken&gt;</typeparam>
+    /// <param name="message">要发送的消息</param>
+    /// <param name="token">用于确定接收通道的令牌</param>
+    /// <returns>发送的消息</returns>
+    /// <exception cref="ArgumentNullException">当消息或令牌为 null 时抛出</exception>
     public TMessage Send<TMessage, TToken>(TMessage message, TToken token)
         where TMessage : class
         where TToken : IEquatable<TToken>
@@ -300,7 +337,7 @@ public sealed class WeakReferenceMessenger : IMessenger
         {
             Type2 type2 = new(typeof(TMessage), typeof(TToken));
 
-            // Try to get the target table
+            // 尝试获取目标表
             if (!this.recipientsMap.TryGetValue(type2, out ConditionalWeakTable2<object, object?>? table))
             {
                 return message;
@@ -308,12 +345,11 @@ public sealed class WeakReferenceMessenger : IMessenger
 
             bufferWriter = ArrayPoolBufferWriter<object?>.Create();
 
-            // We need a local, temporary copy of all the pending recipients and handlers to
-            // invoke, to avoid issues with handlers unregistering from messages while we're
-            // holding the lock. To do this, we can just traverse the conditional table in use
-            // to enumerate all the existing recipients for the token and message types pair
-            // corresponding to the generic arguments for this invocation, and then track the
-            // handlers with a matching token, and their corresponding recipients.
+            // 我们需要一个局部的、临时的副本，包含所有待调用的接收者和处理程序，
+            // 以避免处理程序在我们持有锁时取消注册消息的问题。为了做到这一点，
+            // 我们可以遍历使用的条件表来枚举所有现有的接收者
+            // 对于此调用对应的消息和令牌类型的对，并跟踪
+            // 具有匹配令牌的处理程序及其相应的接收者
             using ConditionalWeakTable2<object, object?>.Enumerator enumerator = table.GetEnumerator();
 
             while (enumerator.MoveNext())
@@ -351,30 +387,28 @@ public sealed class WeakReferenceMessenger : IMessenger
     }
 
     /// <summary>
-    /// Implements the broadcasting logic for <see cref="Send{TMessage, TToken}(TMessage, TToken)"/>.
+    /// 实现 <see cref="Send{TMessage, TToken}(TMessage, TToken)"/> 的广播逻辑
     /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    /// <param name="pairs"></param>
-    /// <param name="i"></param>
-    /// <param name="message"></param>
+    /// <typeparam name="TMessage">消息类型</typeparam>
+    /// <param name="pairs">包含处理程序和接收者对的只读跨度</param>
+    /// <param name="i">对的数量</param>
+    /// <param name="message">要发送的消息</param>
     /// <remarks>
-    /// This method is not a local function to avoid triggering multiple compilations due to <c>TToken</c>
-    /// potentially being a value type, which results in specialized code due to reified generics. This is
-    /// necessary to work around a Roslyn limitation that causes unnecessary type parameters in local
-    /// functions not to be discarded in the synthesized methods. Additionally, keeping this loop outside
-    /// of the EH block (the <see langword="try"/> block) can help result in slightly better codegen.
+    /// 此方法不是局部函数，以避免因 <c>TToken</c> 可能是值类型而导致的多次编译，
+    /// 这会导致专门化的代码，由于具现化泛型。这是为了解决 Roslyn 的限制，
+    /// 该限制导致局部函数中的未使用类型参数不会在合成方法中被丢弃。此外，将此循环保留在
+    /// EH 块（<see langword="try"/> 块）之外可以帮助产生稍微更好的代码生成
     /// </remarks>
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void SendAll<TMessage>(ReadOnlySpan<object?> pairs, int i, TMessage message)
         where TMessage : class
     {
-        // This Slice calls executes bounds checks for the loop below, in case i was somehow wrong.
-        // The rest of the implementation relies on bounds checks removal and loop strength reduction
-        // done manually (which results in a 20% speedup during broadcast), since the JIT is not able
-        // to recognize this pattern. Skipping checks below is a provably safe optimization: the slice
-        // has exactly 2 * i elements (due to this slicing), and each loop iteration processes a pair.
-        // The loops ends when the initial reference reaches the end, and that's incremented by 2 at
-        // the end of each iteration. The target being a span, obviously means the length is constant.
+        // 此 Slice 调用执行循环的边界检查，以防 i 以某种方式错误
+        // 其余实现依赖于边界检查移除和手动完成的循环强度降低（这导致 20% 的速度提升）
+        // 在广播期间，因为 JIT 无法识别此模式。跳过下面的检查是经过证明的安全优化：
+        // 切片正好有 2 * i 个元素（由于此切片），并且每个循环迭代处理一对元素
+        // 循环在初始引用到达末尾时结束，并且在每次迭代结束时增加 2
+        // 以结束于目标引用。目标是跨度，显然意味着长度是恒定的
         ReadOnlySpan<object?> slice = pairs.Slice(0, 2 * i);
 
         ref object? sliceStart = ref MemoryMarshal.GetReference(slice);
@@ -385,27 +419,27 @@ public sealed class WeakReferenceMessenger : IMessenger
             object? handler = sliceStart;
             object recipient = Unsafe.Add(ref sliceStart, 1)!;
 
-            // Here we need to distinguish the two possible cases: either the recipient was registered
-            // through the IRecipient<TMessage> interface, or with a custom handler. In the first case,
-            // the handler stored in the messenger is just null, so we can check that and branch to a
-            // fast path that just invokes IRecipient<TMessage> directly on the recipient. Otherwise,
-            // we will use the standard double dispatch approach. This check is particularly convenient
-            // as we only need to check for null to determine what registration type was used, without
-            // having to store any additional info in the messenger. This will produce code as follows,
-            // with the advantage of also being compact and not having to use any additional registers:
+            // 在这里我们需要区分两种可能的情况：要么接收者是通过
+            // IRecipient<TMessage> 接口注册的，要么是使用自定义处理程序注册的。在第一种情况下，
+            // 存储在 messenger 中的处理程序只是 null，因此我们可以检查并分支到
+            // 直接调用 IRecipient<TMessage> 的快速路径。否则，
+            // 我们将使用标准的双调度方法。此检查特别方便
+            // 因为我们只需检查 null 即可确定使用了哪种注册类型，而无需
+            // 在 messenger 中存储任何其他信息。这将生成如下代码，
+            // 优势是代码紧凑且不需要使用任何额外的寄存器：
             // =============================
             // L0000: test rcx, rcx
             // L0003: jne short L0040
             // =============================
-            // Which is extremely fast. The reason for this conditional check in the first place is that
-            // we're doing manual (null based) guarded devirtualization: if the handler is the marker
-            // type and not an actual handler then we know that the recipient implements
-            // IRecipient<TMessage>, so we can just cast to it and invoke it directly. This avoids
-            // having to store the proxy callback when registering, and also skips an indirection
-            // (invoking the delegate that then invokes the actual method). Additional note: this
-            // pattern ensures that both casts below do not actually alias incompatible reference
-            // types (as in, they would both succeed if they were safe casts), which lets the code
-            // not rely on undefined behavior to run correctly (ie. we're not aliasing delegates).
+            // 这非常快。首先进行此条件检查的原因是
+            // 我们正在执行手动（基于 null 的）受保护虚拟化：如果处理程序是标记
+            // 类型而不是实际处理程序，那么我们知道接收者实现了
+            // IRecipient<TMessage>，因此我们可以转换为它并直接调用它。这避免了
+            // 在注册时存储代理回调，也避免了一个间接层
+            // （调用委托然后调用实际方法）。附加说明：此
+            // 模式确保下面的两个转换实际上不别名不兼容的引用
+            // 类型（换句话说，如果它们是安全转换，这两个转换都会成功），这使代码
+            // 不依赖于未定义行为来正确运行（即，我们不别名委托）
             if (handler is null)
             {
                 Unsafe.As<IRecipient<TMessage>>(recipient).Receive(message);
@@ -419,7 +453,9 @@ public sealed class WeakReferenceMessenger : IMessenger
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 清理内部数据结构，移除已垃圾回收的接收者
+    /// </summary>
     public void Cleanup()
     {
         lock (this.recipientsMap)
@@ -428,7 +464,9 @@ public sealed class WeakReferenceMessenger : IMessenger
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 重置 messenger，清除所有注册的接收者和消息处理程序
+    /// </summary>
     public void Reset()
     {
         lock (this.recipientsMap)
@@ -438,8 +476,8 @@ public sealed class WeakReferenceMessenger : IMessenger
     }
 
     /// <summary>
-    /// Executes a cleanup without locking the current instance. This method has to be
-    /// invoked when a lock on <see cref="recipientsMap"/> has already been acquired.
+    /// 在不锁定当前实例的情况下执行清理。此方法必须在
+    /// 已获取 <see cref="recipientsMap"/> 锁时调用
     /// </summary>
     private void CleanupWithNonBlockingLock()
     {
@@ -465,8 +503,8 @@ public sealed class WeakReferenceMessenger : IMessenger
     }
 
     /// <summary>
-    /// Executes a cleanup without locking the current instance. This method has to be
-    /// invoked when a lock on <see cref="recipientsMap"/> has already been acquired.
+    /// 在不锁定当前实例的情况下执行清理。此方法必须在
+    /// 已获取 <see cref="recipientsMap"/> 锁时调用
     /// </summary>
     private void CleanupWithoutLock()
     {
@@ -475,9 +513,9 @@ public sealed class WeakReferenceMessenger : IMessenger
 
         Dictionary2<Type2, ConditionalWeakTable2<object, object?>>.Enumerator type2Enumerator = this.recipientsMap.GetEnumerator();
 
-        // First, we go through all the currently registered pairs of token and message types.
-        // These represents all the combinations of generic arguments with at least one registered
-        // handler, with the exception of those with recipients that have already been collected.
+        // 首先，我们遍历所有当前注册的令牌和消息类型的对
+        // 这些代表了至少有一个已注册处理程序的所有泛型参数组合，
+        // 除了那些接收者已经被收集的组合
         while (type2Enumerator.MoveNext())
         {
             emptyRecipients.Reset();
@@ -486,9 +524,9 @@ public sealed class WeakReferenceMessenger : IMessenger
 
             if (type2Enumerator.GetKey().TToken == typeof(Unit))
             {
-                // When the token type is unit, there can be no registered recipients with no handlers,
-                // as when the single handler is unsubscribed the recipient is also removed immediately.
-                // Therefore, we need to check that there exists at least one recipient for the message.
+                // 当令牌类型是 Unit 时，不会有已注册但没有处理程序的接收者，
+                // 因为当单个处理程序被取消订阅时，接收者也会立即被移除
+                // 因此，我们需要检查消息是否至少存在一个接收者
                 using ConditionalWeakTable2<object, object?>.Enumerator recipientsEnumerator = type2Enumerator.GetValue().GetEnumerator();
 
                 while (recipientsEnumerator.MoveNext())
@@ -500,8 +538,8 @@ public sealed class WeakReferenceMessenger : IMessenger
             }
             else
             {
-                // Go through the currently alive recipients to look for those with no handlers left. We track
-                // the ones we find to remove them outside of the loop (can't modify during enumeration).
+                // 遍历当前存活的接收者以查找没有处理程序的接收者。我们跟踪
+                // 找到的接收者以在循环外移除它们（不能在枚举期间修改）
                 using (ConditionalWeakTable2<object, object?>.Enumerator recipientsEnumerator = type2Enumerator.GetValue().GetEnumerator())
                 {
                     while (recipientsEnumerator.MoveNext())
@@ -517,21 +555,21 @@ public sealed class WeakReferenceMessenger : IMessenger
                     }
                 }
 
-                // Remove the handler maps for recipients that are still alive but with no handlers
+                // 移除仍存活但没有处理程序的接收者的处理程序映射
                 foreach (object recipient in emptyRecipients.Span)
                 {
                     _ = type2Enumerator.GetValue().Remove(recipient);
                 }
             }
 
-            // Track the type combinations with no recipients or handlers left
+            // 跟踪没有接收者或处理程序的类型组合
             if (!hasAtLeastOneHandler)
             {
                 type2s.Add(type2Enumerator.GetKey());
             }
         }
 
-        // Remove all the mappings with no handlers left
+        // 移除所有没有处理程序的映射
         foreach (Type2 key in type2s.Span)
         {
             _ = this.recipientsMap.TryRemove(key);
@@ -539,7 +577,7 @@ public sealed class WeakReferenceMessenger : IMessenger
     }
 
     /// <summary>
-    /// Throws an <see cref="InvalidOperationException"/> when trying to add a duplicate handler.
+    /// 尝试添加重复处理程序时抛出 <see cref="InvalidOperationException"/>
     /// </summary>
     private static void ThrowInvalidOperationExceptionForDuplicateRegistration()
     {

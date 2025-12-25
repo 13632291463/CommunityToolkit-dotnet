@@ -37,9 +37,9 @@ public sealed class MemoryBufferWriter<T> : IBuffer<T>
 #pragma warning restore IDE0032
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryBufferWriter{T}"/> class.
+    /// 初始化 <see cref="MemoryBufferWriter{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="memory">The target <see cref="Memory{T}"/> instance to write to.</param>
+    /// <param name="memory">要写入的目标 <see cref="Memory{T}"/> 实例。</param>
     public MemoryBufferWriter(Memory<T> memory)
     {
         this.memory = memory;
@@ -80,14 +80,19 @@ public sealed class MemoryBufferWriter<T> : IBuffer<T>
         get => this.memory.Length - this.index;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 清除已写入的数据并重置索引。
+    /// </summary>
     public void Clear()
     {
         this.memory.Slice(0, this.index).Span.Clear();
         this.index = 0;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 将写入索引向前推进指定数量的元素。
+    /// </summary>
+    /// <param name="count">要推进的元素数量。</param>
     public void Advance(int count)
     {
         if (count < 0)
@@ -103,7 +108,11 @@ public sealed class MemoryBufferWriter<T> : IBuffer<T>
         this.index += count;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取可用于写入的内存区域。
+    /// </summary>
+    /// <param name="sizeHint">建议的最小内存大小，如果为0则表示任意大小。</param>
+    /// <returns>可用于写入的 <see cref="Memory{T}"/> 区域。</returns>
     public Memory<T> GetMemory(int sizeHint = 0)
     {
         ValidateSizeHint(sizeHint);
@@ -111,7 +120,11 @@ public sealed class MemoryBufferWriter<T> : IBuffer<T>
         return this.memory.Slice(this.index);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取可用于写入的内存跨度。
+    /// </summary>
+    /// <param name="sizeHint">建议的最小内存大小，如果为0则表示任意大小。</param>
+    /// <returns>可用于写入的 <see cref="Span{T}"/> 区域。</returns>
     public Span<T> GetSpan(int sizeHint = 0)
     {
         ValidateSizeHint(sizeHint);

@@ -14,41 +14,41 @@ using CommunityToolkit.HighPerformance.Buffers.Views;
 namespace CommunityToolkit.HighPerformance.Buffers;
 
 /// <summary>
-/// An <see cref="IMemoryOwner{T}"/> implementation with an embedded length and a fast <see cref="Span{T}"/> accessor.
+/// 一个实现了 <see cref="IMemoryOwner{T}"/> 接口的类型，具有内置长度和快速 <see cref="Span{T}"/> 访问器。
 /// </summary>
-/// <typeparam name="T">The type of items to store in the current instance.</typeparam>
+/// <typeparam name="T">当前实例中存储项的类型。</typeparam>
 [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
 [DebuggerDisplay("{ToString(),raw}")]
 public sealed class MemoryOwner<T> : IMemoryOwner<T>
 {
     /// <summary>
-    /// The starting offset within <see cref="array"/>.
+    /// <see cref="array"/> 中的起始偏移量。
     /// </summary>
     private readonly int start;
 
 #pragma warning disable IDE0032
     /// <summary>
-    /// The usable length within <see cref="array"/> (starting from <see cref="start"/>).
+    /// <see cref="array"/> 中的可用长度（从 <see cref="start"/> 开始）。
     /// </summary>
     private readonly int length;
 #pragma warning restore IDE0032
 
     /// <summary>
-    /// The <see cref="ArrayPool{T}"/> instance used to rent <see cref="array"/>.
+    /// 用于租用 <see cref="array"/> 的 <see cref="ArrayPool{T}"/> 实例。
     /// </summary>
     private readonly ArrayPool<T> pool;
 
     /// <summary>
-    /// The underlying <typeparamref name="T"/> array.
+    /// 底层的 <typeparamref name="T"/> 数组。
     /// </summary>
     private T[]? array;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryOwner{T}"/> class with the specified parameters.
+    /// 使用指定参数初始化 <see cref="MemoryOwner{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="length">The length of the new memory buffer to use.</param>
-    /// <param name="pool">The <see cref="ArrayPool{T}"/> instance to use.</param>
-    /// <param name="mode">Indicates the allocation mode to use for the new buffer to rent.</param>
+    /// <param name="length">要使用的新内存缓冲区的长度。</param>
+    /// <param name="pool">要使用的 <see cref="ArrayPool{T}"/> 实例。</param>
+    /// <param name="mode">指示要用于租用新缓冲区的分配模式。</param>
     private MemoryOwner(int length, ArrayPool<T> pool, AllocationMode mode)
     {
         this.start = 0;
@@ -56,6 +56,7 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
         this.pool = pool;
         this.array = pool.Rent(length);
 
+        // 根据分配模式清空数组内容
         if (mode == AllocationMode.Clear)
         {
             this.array.AsSpan(0, length).Clear();
@@ -63,12 +64,12 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryOwner{T}"/> class with the specified parameters.
+    /// 使用指定参数初始化 <see cref="MemoryOwner{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="start">The starting offset within <paramref name="array"/>.</param>
-    /// <param name="length">The length of the array to use.</param>
-    /// <param name="pool">The <see cref="ArrayPool{T}"/> instance currently in use.</param>
-    /// <param name="array">The input <typeparamref name="T"/> array to use.</param>
+    /// <param name="start">在 <paramref name="array"/> 中的起始偏移量。</param>
+    /// <param name="length">要使用的数组长度。</param>
+    /// <param name="pool">当前使用的 <see cref="ArrayPool{T}"/> 实例。</param>
+    /// <param name="array">要使用的输入 <typeparamref name="T"/> 数组。</param>
     private MemoryOwner(int start, int length, ArrayPool<T> pool, T[] array)
     {
         this.start = start;
@@ -78,7 +79,7 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Gets an empty <see cref="MemoryOwner{T}"/> instance.
+    /// 获取一个空的 <see cref="MemoryOwner{T}"/> 实例。
     /// </summary>
     public static MemoryOwner<T> Empty
     {
@@ -87,51 +88,51 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Creates a new <see cref="MemoryOwner{T}"/> instance with the specified parameters.
+    /// 使用指定参数创建新的 <see cref="MemoryOwner{T}"/> 实例。
     /// </summary>
-    /// <param name="size">The length of the new memory buffer to use.</param>
-    /// <returns>A <see cref="MemoryOwner{T}"/> instance of the requested length.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="size"/> is not valid.</exception>
-    /// <remarks>This method is just a proxy for the <see langword="private"/> constructor, for clarity.</remarks>
+    /// <param name="size">要使用的新内存缓冲区的长度。</param>
+    /// <returns>指定长度的 <see cref="MemoryOwner{T}"/> 实例。</returns>
+    /// <exception cref="ArgumentOutOfRangeException">当 <paramref name="size"/> 无效时抛出。</exception>
+    /// <remarks>此方法只是 <see langword="private"/> 构造函数的代理，为了清晰起见。</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static MemoryOwner<T> Allocate(int size) => new(size, ArrayPool<T>.Shared, AllocationMode.Default);
 
     /// <summary>
-    /// Creates a new <see cref="MemoryOwner{T}"/> instance with the specified parameters.
+    /// 使用指定参数创建新的 <see cref="MemoryOwner{T}"/> 实例。
     /// </summary>
-    /// <param name="size">The length of the new memory buffer to use.</param>
-    /// <param name="pool">The <see cref="ArrayPool{T}"/> instance currently in use.</param>
-    /// <returns>A <see cref="MemoryOwner{T}"/> instance of the requested length.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="size"/> is not valid.</exception>
-    /// <remarks>This method is just a proxy for the <see langword="private"/> constructor, for clarity.</remarks>
+    /// <param name="size">要使用的内存缓冲区的长度。</param>
+    /// <param name="pool">当前使用的 <see cref="ArrayPool{T}"/> 实例。</param>
+    /// <returns>指定长度的 <see cref="MemoryOwner{T}"/> 实例。</returns>
+    /// <exception cref="ArgumentOutOfRangeException">当 <paramref name="size"/> 无效时抛出。</exception>
+    /// <remarks>此方法只是 <see langword="private"/> 构造函数的代理，为了清晰起见。</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static MemoryOwner<T> Allocate(int size, ArrayPool<T> pool) => new(size, pool, AllocationMode.Default);
 
     /// <summary>
-    /// Creates a new <see cref="MemoryOwner{T}"/> instance with the specified parameters.
+    /// 使用指定参数创建新的 <see cref="MemoryOwner{T}"/> 实例。
     /// </summary>
-    /// <param name="size">The length of the new memory buffer to use.</param>
-    /// <param name="mode">Indicates the allocation mode to use for the new buffer to rent.</param>
-    /// <returns>A <see cref="MemoryOwner{T}"/> instance of the requested length.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="size"/> is not valid.</exception>
-    /// <remarks>This method is just a proxy for the <see langword="private"/> constructor, for clarity.</remarks>
+    /// <param name="size">要使用的新内存缓冲区的长度。</param>
+    /// <param name="mode">指示要用于租用新缓冲区的分配模式。</param>
+    /// <returns>指定长度的 <see cref="MemoryOwner{T}"/> 实例。</returns>
+    /// <exception cref="ArgumentOutOfRangeException">当 <paramref name="size"/> 无效时抛出。</exception>
+    /// <remarks>此方法只是 <see langword="private"/> 构造函数的代理，为了清晰起见。</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static MemoryOwner<T> Allocate(int size, AllocationMode mode) => new(size, ArrayPool<T>.Shared, mode);
 
     /// <summary>
-    /// Creates a new <see cref="MemoryOwner{T}"/> instance with the specified parameters.
+    /// 使用指定参数创建新的 <see cref="MemoryOwner{T}"/> 实例。
     /// </summary>
-    /// <param name="size">The length of the new memory buffer to use.</param>
-    /// <param name="pool">The <see cref="ArrayPool{T}"/> instance currently in use.</param>
-    /// <param name="mode">Indicates the allocation mode to use for the new buffer to rent.</param>
-    /// <returns>A <see cref="MemoryOwner{T}"/> instance of the requested length.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="size"/> is not valid.</exception>
-    /// <remarks>This method is just a proxy for the <see langword="private"/> constructor, for clarity.</remarks>
+    /// <param name="size">要使用的新内存缓冲区的长度。</param>
+    /// <param name="pool">当前使用的 <see cref="ArrayPool{T}"/> 实例。</param>
+    /// <param name="mode">指示要用于租用新缓冲区的分配模式。</param>
+    /// <returns>指定长度的 <see cref="MemoryOwner{T}"/> 实例。</returns>
+    /// <exception cref="ArgumentOutOfRangeException">当 <paramref name="size"/> 无效时抛出。</exception>
+    /// <remarks>此方法只是 <see langword="private"/> 构造函数的代理，为了清晰起见。</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static MemoryOwner<T> Allocate(int size, ArrayPool<T> pool, AllocationMode mode) => new(size, pool, mode);
 
     /// <summary>
-    /// Gets the number of items in the current instance
+    /// 获取当前实例中的项目数量。
     /// </summary>
     public int Length
     {
@@ -157,7 +158,7 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Gets a <see cref="Span{T}"/> wrapping the memory belonging to the current instance.
+    /// 获取包装当前实例内存的 <see cref="Span{T}"/>。
     /// </summary>
     public Span<T> Span
     {
@@ -174,15 +175,12 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
 #if NET6_0_OR_GREATER
             ref T r0 = ref array!.DangerousGetReferenceAt(this.start);
 
-            // On .NET 6+ runtimes, we can manually create a span from the starting reference to
-            // skip the argument validations, which include an explicit null check, covariance check
-            // for the array and the actual validation for the starting offset and target length. We
-            // only do this on .NET 6+ as we can leverage the runtime-specific array layout to get
-            // a fast access to the initial element, which makes this trick worth it. Otherwise, on
-            // runtimes where we would need to at least access a static field to retrieve the base
-            // byte offset within an SZ array object, we can get better performance by just using the
-            // default Span<T> constructor and paying the cost of the extra conditional branches,
-            // especially if T is a value type, in which case the covariance check is JIT removed.
+            // 在 .NET 6+ 运行时中，我们可以手动从起始引用创建一个跨度以跳过参数验证，
+            // 这些验证包括显式的空值检查、数组的协变检查以及起始偏移量和目标长度的实际验证。
+            // 我们只在 .NET 6+ 中这样做，因为我们可以利用运行时特定的数组布局来快速访问初始元素，
+            // 这使得这个技巧值得使用。否则，在需要至少访问静态字段以获取 SZ 数组对象中的基字节偏移量的运行时上，
+            // 我们可以通过仅使用默认的 Span<T> 构造函数并支付额外条件分支的成本来获得更好的性能，
+            // 特别是当 T 是值类型时，此时协变检查在 JIT 中被移除。
             return MemoryMarshal.CreateSpan(ref r0, this.length);
 #else
             return new(array!, this.start, this.length);
@@ -191,14 +189,13 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Returns a reference to the first element within the current instance, with no bounds check.
+    /// 返回对当前实例中的第一个元素的引用，不进行边界检查。
     /// </summary>
-    /// <returns>A reference to the first element within the current instance.</returns>
-    /// <exception cref="ObjectDisposedException">Thrown when the buffer in use has already been disposed.</exception>
+    /// <returns>对当前实例中的第一个元素的引用。</returns>
+    /// <exception cref="ObjectDisposedException">当正在使用的缓冲区已被释放时抛出。</exception>
     /// <remarks>
-    /// This method does not perform bounds checks on the underlying buffer, but does check whether
-    /// the buffer itself has been disposed or not. This check should not be removed, and it's also
-    /// the reason why the method to get a reference at a specified offset is not present.
+    /// 此方法不对底层缓冲区执行边界检查，但会检查缓冲区本身是否已被释放。
+    /// 此检查不应被删除，它也是不提供获取指定偏移量处引用的方法的原因。
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref T DangerousGetReference()
@@ -214,15 +211,14 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Gets an <see cref="ArraySegment{T}"/> instance wrapping the underlying <typeparamref name="T"/> array in use.
+    /// 获取包装底层 <typeparamref name="T"/> 数组的 <see cref="ArraySegment{T}"/> 实例。
     /// </summary>
-    /// <returns>An <see cref="ArraySegment{T}"/> instance wrapping the underlying <typeparamref name="T"/> array in use.</returns>
-    /// <exception cref="ObjectDisposedException">Thrown when the buffer in use has already been disposed.</exception>
+    /// <returns>包装底层 <typeparamref name="T"/> 数组的 <see cref="ArraySegment{T}"/> 实例。</returns>
+    /// <exception cref="ObjectDisposedException">当正在使用的缓冲区已被释放时抛出。</exception>
     /// <remarks>
-    /// This method is meant to be used when working with APIs that only accept an array as input, and should be used with caution.
-    /// In particular, the returned array is rented from an array pool, and it is responsibility of the caller to ensure that it's
-    /// not used after the current <see cref="MemoryOwner{T}"/> instance is disposed. Doing so is considered undefined behavior,
-    /// as the same array might be in use within another <see cref="MemoryOwner{T}"/> instance.
+    /// 此方法旨在与只接受数组作为输入的 API 一起使用，应谨慎使用。
+    /// 特别是，返回的数组是从数组池租用的，调用者有责任确保在当前 <see cref="MemoryOwner{T}"/> 实例被释放后不使用它。
+    /// 这样做被认为是未定义的行为，因为相同的数组可能正在另一个 <see cref="MemoryOwner{T}"/> 实例中使用。
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ArraySegment<T> DangerousGetArray()
@@ -238,18 +234,17 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Slices the buffer currently in use and returns a new <see cref="MemoryOwner{T}"/> instance.
+    /// 切片当前使用的缓冲区并返回一个新的 <see cref="MemoryOwner{T}"/> 实例。
     /// </summary>
-    /// <param name="start">The starting offset within the current buffer.</param>
-    /// <param name="length">The length of the buffer to use.</param>
-    /// <returns>A new <see cref="MemoryOwner{T}"/> instance using the target range of items.</returns>
-    /// <exception cref="ObjectDisposedException">Thrown when the buffer in use has already been disposed.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="start"/> or <paramref name="length"/> are not valid.</exception>
+    /// <param name="start">当前缓冲区内的起始偏移量。</param>
+    /// <param name="length">要使用的缓冲区长度。</param>
+    /// <returns>使用目标项目范围的新 <see cref="MemoryOwner{T}"/> 实例。</returns>
+    /// <exception cref="ObjectDisposedException">当正在使用的缓冲区已被释放时抛出。</exception>
+    /// <exception cref="ArgumentOutOfRangeException">当 <paramref name="start"/> 或 <paramref name="length"/> 无效时抛出。</exception>
     /// <remarks>
-    /// Using this method will dispose the current instance, and should only be used when an oversized
-    /// buffer is rented and then adjusted in size, to avoid having to rent a new buffer of the new
-    /// size and copy the previous items into the new one, or needing an additional variable/field
-    /// to manually handle to track the used range within a given <see cref="MemoryOwner{T}"/> instance.
+    /// 使用此方法将释放当前实例，仅应在租用过大缓冲区然后调整大小时使用，
+    /// 以避免必须租用新大小的新缓冲区并将前一个项目复制到新缓冲区，
+    /// 或需要额外的变量/字段来手动跟踪 <see cref="MemoryOwner{T}"/> 实例中的使用范围。
     /// </remarks>
     public MemoryOwner<T> Slice(int start, int length)
     {
@@ -262,19 +257,21 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
 
         this.array = null;
 
+        // 验证起始偏移量是否在有效范围内
         if ((uint)start > this.length)
         {
             ThrowInvalidOffsetException();
         }
 
+        // 验证长度是否在有效范围内
         if ((uint)length > (this.length - start))
         {
             ThrowInvalidLengthException();
         }
 
-        // We're transferring the ownership of the underlying array, so the current
-        // instance no longer needs to be disposed. Because of this, we can manually
-        // suppress the finalizer to reduce the overhead on the garbage collector.
+        // 我们正在转移底层数组的所有权，因此当前
+        // 实例不再需要被释放。由于这一点，我们可以手动
+        // 抑制终结器以减少垃圾回收器的开销。
         GC.SuppressFinalize(this);
 
         return new(start, length, this.pool, array!);
@@ -292,47 +289,51 @@ public sealed class MemoryOwner<T> : IMemoryOwner<T>
 
         this.array = null;
 
+        // 将数组返回到池中
         this.pool.Return(array);
     }
 
     /// <inheritdoc/>
     public override string ToString()
     {
-        // Normally we would throw if the array has been disposed,
-        // but in this case we'll just return the non formatted
-        // representation as a fallback, since the ToString method
-        // is generally expected not to throw exceptions.
+        // 通常我们会抛出异常如果数组已被释放，
+        // 但在这种情况下，我们会返回非格式化的
+        // 表示作为后备，因为 ToString 方法
+        // 通常不应抛出异常。
         if (typeof(T) == typeof(char) &&
             this.array is char[] chars)
         {
             return new(chars, this.start, this.length);
         }
 
-        // Same representation used in Span<T>
+        // 与 Span<T> 中使用的相同表示
         return $"CommunityToolkit.HighPerformance.Buffers.MemoryOwner<{typeof(T)}>[{this.length}]";
     }
 
     /// <summary>
-    /// Throws an <see cref="ObjectDisposedException"/> when <see cref="array"/> is <see langword="null"/>.
+    /// 当 <see cref="array"/> 为 <see langword="null"/> 时抛出 <see cref="ObjectDisposedException"/>。
     /// </summary>
     private static void ThrowObjectDisposedException()
     {
+        // "当前缓冲区已被释放"
         throw new ObjectDisposedException(nameof(MemoryOwner<T>), "The current buffer has already been disposed");
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the <see cref="start"/> is invalid.
+    /// 当 <see cref="start"/> 无效时抛出 <see cref="ArgumentOutOfRangeException"/>。
     /// </summary>
     private static void ThrowInvalidOffsetException()
     {
+        // "输入的起始参数无效"
         throw new ArgumentOutOfRangeException(nameof(start), "The input start parameter was not valid");
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the <see cref="length"/> is invalid.
+    /// 当 <see cref="length"/> 无效时抛出 <see cref="ArgumentOutOfRangeException"/>。
     /// </summary>
     private static void ThrowInvalidLengthException()
     {
+        // "输入的长度参数无效"
         throw new ArgumentOutOfRangeException(nameof(length), "The input length parameter was not valid");
     }
 }

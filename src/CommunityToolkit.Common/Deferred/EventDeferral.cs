@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace CommunityToolkit.Common.Deferred;
 
 /// <summary>
-/// Deferral handle provided by a <see cref="DeferredEventArgs"/>.
+/// 由 <see cref="DeferredEventArgs"/> 提供的延迟处理句柄
 /// </summary>
 public class EventDeferral : IDisposable
 {
@@ -25,12 +25,15 @@ public class EventDeferral : IDisposable
     private readonly TaskCompletionSource<object?> taskCompletionSource = new();
 #endif
 
+    /// <summary>
+    /// 初始化 <see cref="EventDeferral"/> 类的新实例
+    /// </summary>
     internal EventDeferral()
     {
     }
 
     /// <summary>
-    /// Call when finished with the Deferral.
+    /// 完成延迟处理时调用此方法
     /// </summary>
     public void Complete()
     {
@@ -42,12 +45,13 @@ public class EventDeferral : IDisposable
     }
 
     /// <summary>
-    /// Waits for the <see cref="EventDeferral"/> to be completed by the event handler.
+    /// 等待 <see cref="EventDeferral"/> 被事件处理程序完成
     /// </summary>
-    /// <param name="cancellationToken"><see cref="CancellationToken"/>.</param>
-    /// <returns><see cref="Task"/>.</returns>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务</returns>
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
+	// "这是仅供事件处理程序扩展类使用的内部方法，公共调用者应调用 DeferredEventArgs 上的 GetDeferral() 方法。"
     [Obsolete("This is an internal only method to be used by EventHandler extension classes, public callers should call GetDeferral() instead on the DeferredEventArgs.")]
     public async Task WaitForCompletion(CancellationToken cancellationToken)
     {
@@ -67,7 +71,9 @@ public class EventDeferral : IDisposable
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 释放资源
+    /// </summary>
     public void Dispose()
     {
         Complete();

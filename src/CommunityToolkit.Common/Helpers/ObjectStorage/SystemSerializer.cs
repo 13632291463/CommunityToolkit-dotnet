@@ -7,35 +7,38 @@ using System;
 namespace CommunityToolkit.Common.Helpers;
 
 /// <summary>
-/// A bare-bones serializer which knows how to deal with primitive types and strings only.
-/// It is recommended for more complex scenarios to implement your own <see cref="IObjectSerializer"/> based on System.Text.Json, Newtonsoft.Json, or DataContractJsonSerializer see https://aka.ms/wct/storagehelper-migration
+/// 一个简单的序列化器，只能处理基本类型和字符串。
+/// 建议在更复杂的场景中实现自己的 <see cref="IObjectSerializer"/>，基于 System.Text.Json、Newtonsoft.Json 或 DataContractJsonSerializer，参见 https://aka.ms/wct/storagehelper-migration
 /// </summary>
 public class SystemSerializer : IObjectSerializer
 {
     /// <summary>
-    /// Take a primitive value from storage and return it as the requested type using the <see cref="Convert.ChangeType(object, Type)"/> API.
+    /// 从存储中获取基本类型值并使用 <see cref="Convert.ChangeType(object, Type)"/> API 转换为请求的类型
     /// </summary>
-    /// <typeparam name="T">Type to convert value to.</typeparam>
-    /// <param name="value">Value from storage to convert.</param>
-    /// <returns>Deserialized value or default value.</returns>
+    /// <typeparam name="T">要将值转换为的类型</typeparam>
+    /// <param name="value">要转换的存储中的值</param>
+    /// <returns>反序列化的值或默认值</returns>
     public T Deserialize<T>(string value)
     {
+        // 检查类型是否为基本类型或字符串
         if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
         {
             return (T)Convert.ChangeType(value, typeof(T));
         }
 
+        // 如果不是基本类型或字符串，抛出不支持异常
         throw new NotSupportedException("This serializer can only handle primitive types and strings. Please implement your own IObjectSerializer for more complex scenarios.");
     }
 
     /// <summary>
-    /// Returns the value so that it can be serialized directly.
+    /// 返回值以便可以直接序列化
     /// </summary>
-    /// <typeparam name="T">Type to serialize from.</typeparam>
-    /// <param name="value">Value to serialize.</param>
-    /// <returns>String representation of value.</returns>
+    /// <typeparam name="T">要序列化的类型</typeparam>
+    /// <param name="value">要序列化的值</param>
+    /// <returns>值的字符串表示形式</returns>
     public string? Serialize<T>(T value)
     {
+        // 将值转换为字符串表示形式
         return value?.ToString();
     }
 }

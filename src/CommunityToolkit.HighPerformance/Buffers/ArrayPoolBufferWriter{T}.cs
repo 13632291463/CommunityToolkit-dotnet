@@ -297,10 +297,12 @@ public sealed class ArrayPoolBufferWriter<T> : IBuffer<T>, IMemoryOwner<T>
         return $"CommunityToolkit.HighPerformance.Buffers.ArrayPoolBufferWriter<{typeof(T)}>[{this.index}]";
     }
 
+
+
     /// <summary>
-    /// Ensures that <see cref="array"/> has enough free space to contain a given number of new items.
+    /// 检查并确保数组有足够的空间来容纳指定数量的新项
     /// </summary>
-    /// <param name="sizeHint">The minimum number of items to ensure space for in <see cref="array"/>.</param>
+    /// <param name="sizeHint">需要确保的最小项数</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CheckBufferAndEnsureCapacity(int sizeHint)
     {
@@ -328,9 +330,9 @@ public sealed class ArrayPoolBufferWriter<T> : IBuffer<T>, IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Resizes <see cref="array"/> to ensure it can fit the specified number of new items.
+    /// 调整数组大小以确保它可以容纳指定数量的新项
     /// </summary>
-    /// <param name="sizeHint">The minimum number of items to ensure space for in <see cref="array"/>.</param>
+    /// <param name="sizeHint">需要确保的最小项数</param>
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void ResizeBuffer(int sizeHint)
     {
@@ -350,7 +352,7 @@ public sealed class ArrayPoolBufferWriter<T> : IBuffer<T>, IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the requested count is negative.
+    /// 当请求的计数为负数时抛出 ArgumentOutOfRangeException 异常
     /// </summary>
     private static void ThrowArgumentOutOfRangeExceptionForNegativeCount()
     {
@@ -358,7 +360,7 @@ public sealed class ArrayPoolBufferWriter<T> : IBuffer<T>, IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the size hint is negative.
+    /// 当大小提示为负数时抛出 ArgumentOutOfRangeException 异常
     /// </summary>
     private static void ThrowArgumentOutOfRangeExceptionForNegativeSizeHint()
     {
@@ -366,7 +368,7 @@ public sealed class ArrayPoolBufferWriter<T> : IBuffer<T>, IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the requested count is negative.
+    /// 当缓冲区前进过多时抛出 ArgumentException 异常
     /// </summary>
     private static void ThrowArgumentExceptionForAdvancedTooFar()
     {
@@ -374,7 +376,7 @@ public sealed class ArrayPoolBufferWriter<T> : IBuffer<T>, IMemoryOwner<T>
     }
 
     /// <summary>
-    /// Throws an <see cref="ObjectDisposedException"/> when <see cref="array"/> is <see langword="null"/>.
+    /// 当数组为 null 时抛出 ObjectDisposedException 异常
     /// </summary>
     private static void ThrowObjectDisposedException()
     {

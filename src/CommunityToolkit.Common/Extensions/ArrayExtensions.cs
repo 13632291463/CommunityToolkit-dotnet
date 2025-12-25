@@ -10,19 +10,19 @@ using System.Text;
 namespace CommunityToolkit.Common;
 
 /// <summary>
-/// Helpers for working with arrays.
+/// 数组操作辅助类
 /// </summary>
 public static class ArrayExtensions
 {
     /// <summary>
-    /// Yields a column from a jagged array.
-    /// An exception will be thrown if the column is out of bounds, and return default in places where there are no elements from inner arrays.
-    /// Note: There is no equivalent GetRow method, as you can use array[row] to retrieve.
+    /// 从锯齿数组中获取指定列的元素
+    /// 如果列索引超出范围，将抛出异常；对于没有元素的位置返回默认值
+    /// 注意：没有等效的 GetRow 方法，因为可以使用 array[row] 来获取行
     /// </summary>
-    /// <typeparam name="T">The element type of the array.</typeparam>
-    /// <param name="rectarray">The source array.</param>
-    /// <param name="column">Column record to retrieve, 0-based index.</param>
-    /// <returns>Yielded enumerable of column elements for given column, and default values for smaller inner arrays.</returns>
+    /// <typeparam name="T">数组元素类型</typeparam>
+    /// <param name="rectarray">源数组</param>
+    /// <param name="column">要获取的列记录，从0开始的索引</param>
+    /// <returns>给定列的元素枚举，对于较小的内部数组使用默认值</returns>
     public static IEnumerable<T?> GetColumn<T>(this T?[][] rectarray, int column)
     {
         if (column < 0 || column >= rectarray.Max(array => array.Length))
@@ -44,14 +44,14 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Returns a simple string representation of an array.
+    /// 返回数组的字符串表示
     /// </summary>
-    /// <typeparam name="T">The element type of the array.</typeparam>
-    /// <param name="array">The source array.</param>
-    /// <returns>The <see cref="string"/> representation of the array.</returns>
+    /// <typeparam name="T">数组元素类型</typeparam>
+    /// <param name="array">源数组</param>
+    /// <returns>数组的字符串表示</returns>
     public static string ToArrayString<T>(this T?[] array)
     {
-        // The returned string will be in the following format:
+        // 返回的字符串将采用以下格式:
         // [1, 2, 3]
         StringBuilder builder = new();
 
@@ -73,14 +73,14 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Returns a simple string representation of a jagged array.
+    /// 返回锯齿数组的字符串表示
     /// </summary>
-    /// <typeparam name="T">The element type of the array.</typeparam>
-    /// <param name="mdarray">The source array.</param>
-    /// <returns>String representation of the array.</returns>
+    /// <typeparam name="T">数组元素类型</typeparam>
+    /// <param name="mdarray">源数组</param>
+    /// <returns>数组的字符串表示</returns>
     public static string ToArrayString<T>(this T?[][] mdarray)
     {
-        // The returned string uses the same format as the overload for 2D arrays
+        // 返回的字符串使用与2D数组重载相同的格式
         StringBuilder builder = new();
 
         _ = builder.Append('[');
@@ -117,14 +117,14 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Returns a simple string representation of a 2D array.
+    /// 返回二维数组的字符串表示
     /// </summary>
-    /// <typeparam name="T">The element type of the array.</typeparam>
-    /// <param name="array">The source array.</param>
-    /// <returns>The <see cref="string"/> representation of the array.</returns>
+    /// <typeparam name="T">数组元素类型</typeparam>
+    /// <param name="array">源数组</param>
+    /// <returns>数组的字符串表示</returns>
     public static string ToArrayString<T>(this T?[,] array)
     {
-        // The returned string will be in the following format:
+        // 返回的字符串将采用以下格式:
         // [[1, 2,  3],
         //  [4, 5,  6],
         //  [7, 8,  9]]

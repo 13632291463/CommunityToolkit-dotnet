@@ -7,49 +7,49 @@ using System.Diagnostics;
 namespace CommunityToolkit.HighPerformance.Buffers.Views;
 
 /// <summary>
-/// A debug proxy used to display items in a 1D layout.
+/// 用于以一维布局显示项的调试代理类
 /// </summary>
-/// <typeparam name="T">The type of items to display.</typeparam>
+/// <typeparam name="T">要显示的项的类型</typeparam>
 internal sealed class MemoryDebugView<T>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryDebugView{T}"/> class with the specified parameters.
+    /// 使用指定参数初始化 MemoryDebugView 类的新实例
     /// </summary>
-    /// <param name="arrayPoolBufferWriter">The input <see cref="ArrayPoolBufferWriter{T}"/> instance with the items to display.</param>
+    /// <param name="arrayPoolBufferWriter">包含要显示项的输入 ArrayPoolBufferWriter 实例</param>
     public MemoryDebugView(ArrayPoolBufferWriter<T>? arrayPoolBufferWriter)
     {
         this.Items = arrayPoolBufferWriter?.WrittenSpan.ToArray();
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryDebugView{T}"/> class with the specified parameters.
+    /// 使用指定参数初始化 MemoryDebugView 类的新实例
     /// </summary>
-    /// <param name="memoryBufferWriter">The input <see cref="MemoryBufferWriter{T}"/> instance with the items to display.</param>
+    /// <param name="memoryBufferWriter">包含要显示项的输入 MemoryBufferWriter 实例</param>
     public MemoryDebugView(MemoryBufferWriter<T>? memoryBufferWriter)
     {
         this.Items = memoryBufferWriter?.WrittenSpan.ToArray();
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryDebugView{T}"/> class with the specified parameters.
+    /// 使用指定参数初始化 MemoryDebugView 类的新实例
     /// </summary>
-    /// <param name="memoryOwner">The input <see cref="MemoryOwner{T}"/> instance with the items to display.</param>
+    /// <param name="memoryOwner">包含要显示项的输入 MemoryOwner 实例</param>
     public MemoryDebugView(MemoryOwner<T>? memoryOwner)
     {
         this.Items = memoryOwner?.Span.ToArray();
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemoryDebugView{T}"/> class with the specified parameters.
+    /// 使用指定参数初始化 MemoryDebugView 类的新实例
     /// </summary>
-    /// <param name="spanOwner">The input <see cref="SpanOwner{T}"/> instance with the items to display.</param>
+    /// <param name="spanOwner">包含要显示项的输入 SpanOwner 实例</param>
     public MemoryDebugView(SpanOwner<T> spanOwner)
     {
         this.Items = spanOwner.Span.ToArray();
     }
 
     /// <summary>
-    /// Gets the items to display for the current instance
+    /// 获取当前实例要显示的项
     /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
     public T[]? Items { get; }

@@ -16,38 +16,33 @@ using BitOperations = CommunityToolkit.HighPerformance.Helpers.Internals.BitOper
 namespace CommunityToolkit.HighPerformance.Buffers;
 
 /// <summary>
-/// A configurable pool for <see cref="string"/> instances. This can be used to minimize allocations
-/// when creating multiple <see cref="string"/> instances from buffers of <see cref="char"/> values.
-/// The <see cref="GetOrAdd(ReadOnlySpan{char})"/> method provides a best-effort alternative to just creating
-/// a new <see cref="string"/> instance every time, in order to minimize the number of duplicated instances.
-/// The <see cref="StringPool"/> type will internally manage a highly efficient priority queue for the
-/// cached <see cref="string"/> instances, so that when the full capacity is reached, the least frequently
-/// used values will be automatically discarded to leave room for new values to cache.
+/// 一个可配置的字符串池，用于缓存字符串实例。这可以减少创建多个字符数组转换为字符串时的内存分配。
+/// 提供 GetOrAdd 方法来最小化重复字符串实例的数量，当达到最大容量时，会自动丢弃使用频率最低的值。
 /// </summary>
 public sealed class StringPool
 {
     /// <summary>
-    /// The size used by default by the parameterless constructor.
+    /// 默认构造函数使用的大小。
     /// </summary>
     private const int DefaultSize = 2048;
 
     /// <summary>
-    /// The minimum size for <see cref="StringPool"/> instances.
+    /// StringPool 实例的最小大小。
     /// </summary>
     private const int MinimumSize = 32;
 
     /// <summary>
-    /// The current array of <see cref="FixedSizePriorityMap"/> instances in use.
+    /// 当前使用的 FixedSizePriorityMap 实例数组。
     /// </summary>
     private readonly FixedSizePriorityMap[] maps;
 
     /// <summary>
-    /// The total number of maps in use.
+    /// 使用中的映射数量。
     /// </summary>
     private readonly int numberOfMaps;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StringPool"/> class.
+    /// 初始化 StringPool 类的新实例。
     /// </summary>
     public StringPool()
         : this(DefaultSize)
@@ -55,9 +50,9 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StringPool"/> class.
+    /// 初始化 StringPool 类的新实例。
     /// </summary>
-    /// <param name="minimumSize">The minimum size for the pool to create.</param>
+    /// <param name="minimumSize">要创建的池的最小大小。</param>
     public StringPool(int minimumSize)
     {
         if (minimumSize <= 0)
@@ -65,10 +60,10 @@ public sealed class StringPool
             ThrowArgumentOutOfRangeException();
         }
 
-        // Set the minimum size
+        // 设置最小大小
         minimumSize = Math.Max(minimumSize, MinimumSize);
 
-        // Calculates the rounded up factors for a specific size/factor pair
+        // 计算指定大小和因子的向上取整结果
         static void FindFactors(int size, int factor, out uint x, out uint y)
         {
             double a = Math.Sqrt((double)size / factor);
@@ -78,15 +73,10 @@ public sealed class StringPool
             y = BitOperations.RoundUpToPowerOf2((uint)b);
         }
 
-        // We want to find two powers of 2 factors that produce a number
-        // that is at least equal to the requested size. In order to find the
-        // combination producing the optimal factors (with the product being as
-        // close as possible to the requested size), we test a number of ratios
-        // that we consider acceptable, and pick the best results produced.
-        // The ratio between maps influences the number of objects being allocated,
-        // as well as the multithreading performance when locking on maps.
-        // We still want to constraint this number to avoid situations where we
-        // have a way too high number of maps compared to total size.
+        // 我们要找到两个2的幂次因子，使其乘积至少等于请求的大小
+        // 为了找到最佳的因子组合（乘积尽可能接近请求的大小），我们测试几个我们认为可接受的比例，并选择最佳结果
+        // 地图之间的比例影响分配的对象数量以及在地图上锁定时的多线程性能
+        // 我们仍要限制这个数字，以避免出现地图数量相对于总大小过多的情况
         FindFactors(minimumSize, 2, out uint x2, out uint y2);
         FindFactors(minimumSize, 3, out uint x3, out uint y3);
         FindFactors(minimumSize, 4, out uint x4, out uint y4);
@@ -111,9 +101,8 @@ public sealed class StringPool
 
         Span<FixedSizePriorityMap> span = this.maps = new FixedSizePriorityMap[x2];
 
-        // We preallocate the maps in advance, since each bucket only contains the
-        // array field, which is not preinitialized, so the allocations are minimal.
-        // This lets us lock on each individual map when retrieving a string instance.
+        // 预先分配映射，因为每个桶只包含数组字段，该字段未预初始化，所以分配很小
+        // 这让我们在获取字符串实例时可以锁定每个单独的映射
         foreach (ref FixedSizePriorityMap map in span)
         {
             map = new FixedSizePriorityMap((int)y2);
@@ -125,25 +114,24 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Gets the shared <see cref="StringPool"/> instance.
+    /// 获取共享的 StringPool 实例。
     /// </summary>
     /// <remarks>
-    /// The shared pool provides a singleton, reusable <see cref="StringPool"/> instance that
-    /// can be accessed directly, and that pools <see cref="string"/> instances for the entire
-    /// process. Since <see cref="StringPool"/> is thread-safe, the shared instance can be used
-    /// concurrently by multiple threads without the need for manual synchronization.
+    /// 共享池提供一个可重用的 StringPool 实例，可以被整个进程直接访问，
+    /// 并缓存字符串实例。由于 StringPool 是线程安全的，因此共享实例可以
+    /// 由多个线程并发使用，而无需手动同步。
     /// </remarks>
     public static StringPool Shared { get; } = new();
 
     /// <summary>
-    /// Gets the total number of <see cref="string"/> that can be stored in the current instance.
+    /// 获取当前实例中可以存储的字符串总数。
     /// </summary>
     public int Size { get; }
 
     /// <summary>
-    /// Stores a <see cref="string"/> instance in the internal cache.
+    /// 将字符串实例存储在内部缓存中。
     /// </summary>
-    /// <param name="value">The input <see cref="string"/> instance to cache.</param>
+    /// <param name="value">要缓存的输入字符串实例。</param>
     public void Add(string value)
     {
         if (value.Length == 0)
@@ -163,10 +151,10 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Gets a cached <see cref="string"/> instance matching the input content, or stores the input one.
+    /// 获取具有相同内容的缓存字符串实例，或存储输入的实例。
     /// </summary>
-    /// <param name="value">The input <see cref="string"/> instance with the contents to use.</param>
-    /// <returns>A <see cref="string"/> instance with the contents of <paramref name="value"/>, cached if possible.</returns>
+    /// <param name="value">包含要使用内容的输入字符串实例。</param>
+    /// <returns>具有 value 内容的字符串实例，如果可能则已缓存。</returns>
     public string GetOrAdd(string value)
     {
         if (value.Length == 0)
@@ -186,10 +174,10 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Gets a cached <see cref="string"/> instance matching the input content, or creates a new one.
+    /// 获取具有相同内容的缓存字符串实例，或创建一个新实例。
     /// </summary>
-    /// <param name="span">The input <see cref="ReadOnlySpan{T}"/> with the contents to use.</param>
-    /// <returns>A <see cref="string"/> instance with the contents of <paramref name="span"/>, cached if possible.</returns>
+    /// <param name="span">包含要使用内容的输入 ReadOnlySpan。</param>
+    /// <returns>具有 span 内容的字符串实例，如果可能则已缓存。</returns>
     public string GetOrAdd(ReadOnlySpan<char> span)
     {
         if (span.IsEmpty)
@@ -209,11 +197,11 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Gets a cached <see cref="string"/> instance matching the input content (converted to Unicode), or creates a new one.
+    /// 获取具有相同内容（转换为Unicode）的缓存字符串实例，或创建一个新实例。
     /// </summary>
-    /// <param name="span">The input <see cref="ReadOnlySpan{T}"/> with the contents to use, in a specified encoding.</param>
-    /// <param name="encoding">The <see cref="Encoding"/> instance to use to decode the contents of <paramref name="span"/>.</param>
-    /// <returns>A <see cref="string"/> instance with the contents of <paramref name="span"/>, cached if possible.</returns>
+    /// <param name="span">包含要使用内容的输入 ReadOnlySpan，以指定编码。</param>
+    /// <param name="encoding">用于解码 span 内容的 Encoding 实例。</param>
+    /// <returns>具有 span 内容的字符串实例，如果可能则已缓存。</returns>
     public unsafe string GetOrAdd(ReadOnlySpan<byte> span, Encoding encoding)
     {
         if (span.IsEmpty)
@@ -235,11 +223,11 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Tries to get a cached <see cref="string"/> instance matching the input content, if present.
+    /// 尝试获取具有相同内容的缓存字符串实例（如果存在）。
     /// </summary>
-    /// <param name="span">The input <see cref="ReadOnlySpan{T}"/> with the contents to use.</param>
-    /// <param name="value">The resulting cached <see cref="string"/> instance, if present</param>
-    /// <returns>Whether or not the target <see cref="string"/> instance was found.</returns>
+    /// <param name="span">包含要使用内容的输入 ReadOnlySpan。</param>
+    /// <param name="value">结果缓存的字符串实例（如果存在）。</param>
+    /// <returns>是否找到目标字符串实例。</returns>
     public bool TryGet(ReadOnlySpan<char> span, [NotNullWhen(true)] out string? value)
     {
         if (span.IsEmpty)
@@ -261,7 +249,7 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Resets the current instance and its associated maps.
+    /// 重置当前实例及其关联的映射。
     /// </summary>
     public void Reset()
     {
@@ -275,95 +263,92 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// A configurable map containing a group of cached <see cref="string"/> instances.
+    /// 一个包含缓存字符串实例组的可配置映射。
     /// </summary>
     /// <remarks>
-    /// Instances of this type are stored in an array within <see cref="StringPool"/> and they are
-    /// always accessed by reference - essentially as if this type had been a class. The type is
-    /// also private, so there's no risk for users to directly access it and accidentally copy an
-    /// instance, which would lead to bugs due to values becoming out of sync with the internal state
-    /// (that is, because instances would be copied by value, so primitive fields would not be shared).
-    /// The reason why we're using a struct here is to remove an indirection level and improve cache
-    /// locality when accessing individual buckets from the methods in the <see cref="StringPool"/> type.
+    /// StringPool 中存储的这些实例始终按引用访问 - 本质上就像这个类型是一个类一样。
+    /// 该类型也是私有的，因此用户无法直接访问它并意外复制实例，这会导致值与内部状态不同步的错误
+    /// （即，因为实例将按值复制，所以原始字段不会共享）。
+    /// 我们在此使用结构的原因是为了删除一个间接级别并提高访问 StringPool 类型中各个桶时的缓存局部性。
     /// </remarks>
     private struct FixedSizePriorityMap
     {
         /// <summary>
-        /// The index representing the end of a given list.
+        /// 表示给定列表的结束索引。
         /// </summary>
         private const int EndOfList = -1;
 
         /// <summary>
-        /// The array of 1-based indices for the <see cref="MapEntry"/> items stored in <see cref="mapEntries"/>.
+        /// MapEntry 项的1索引数组，存储在 mapEntries 中。
         /// </summary>
         private readonly int[] buckets;
 
         /// <summary>
-        /// The array of currently cached entries (ie. the lists for each hash group).
+        /// 当前缓存条目的数组（即每个哈希组的列表）。
         /// </summary>
         private readonly MapEntry[] mapEntries;
 
         /// <summary>
-        /// The array of priority values associated to each item stored in <see cref="mapEntries"/>.
+        /// 与存储在 mapEntries 中的每个项目关联的优先级值数组。
         /// </summary>
         private readonly HeapEntry[] heapEntries;
 
         /// <summary>
-        /// The current number of items stored in the map.
+        /// 地图中当前存储的项目数。
         /// </summary>
         private int count;
 
         /// <summary>
-        /// The current incremental timestamp for the items stored in <see cref="heapEntries"/>.
+        /// heapEntries 中存储的项目的当前时间戳。
         /// </summary>
         private uint timestamp;
 
         /// <summary>
-        /// A type representing a map entry, ie. a node in a given list.
+        /// 表示映射条目的类型，即列表中的节点。
         /// </summary>
         private struct MapEntry
         {
             /// <summary>
-            /// The precomputed hashcode for <see cref="Value"/>.
+            /// Value 的预计算哈希码。
             /// </summary>
             public int HashCode;
 
             /// <summary>
-            /// The <see cref="string"/> instance cached in this entry.
+            /// 在此条目中缓存的字符串实例。
             /// </summary>
             public string? Value;
 
             /// <summary>
-            /// The 0-based index for the next node in the current list.
+            /// 当前列表中下一个节点的0索引。
             /// </summary>
             public int NextIndex;
 
             /// <summary>
-            /// The 0-based index for the heap entry corresponding to the current node.
+            /// 与当前节点对应的堆条目的0索引。
             /// </summary>
             public int HeapIndex;
         }
 
         /// <summary>
-        /// A type representing a heap entry, used to associate priority to each item.
+        /// 表示堆条目的类型，用于为每个项目关联优先级。
         /// </summary>
         private struct HeapEntry
         {
             /// <summary>
-            /// The timestamp for the current entry (ie. the priority for the item).
+            /// 当前条目的时间戳（即项目的优先级）。
             /// </summary>
             public uint Timestamp;
 
             /// <summary>
-            /// The 0-based index for the map entry corresponding to the current item.
+            /// 与当前项目对应的映射条目的0索引。
             /// </summary>
             public int MapIndex;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FixedSizePriorityMap"/> struct.
+        /// 初始化 FixedSizePriorityMap 结构的新实例。
         /// </summary>
-        /// <param name="capacity">The fixed capacity of the current map.</param>
+        /// <param name="capacity">当前映射的固定容量。</param>
         public FixedSizePriorityMap(int capacity)
         {
             this.buckets = new int[capacity];
@@ -374,7 +359,7 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Gets an <see cref="object"/> that can be used to synchronize access to the current instance.
+        /// 获取可用于同步对当前实例的访问的对象。
         /// </summary>
         public readonly object SyncRoot
         {
@@ -383,10 +368,10 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Implements <see cref="StringPool.Add"/> for the current instance.
+        /// 为当前实例实现 StringPool.Add 方法。
         /// </summary>
-        /// <param name="value">The input <see cref="string"/> instance to cache.</param>
-        /// <param name="hashcode">The precomputed hashcode for <paramref name="value"/>.</param>
+        /// <param name="value">要缓存的输入字符串实例。</param>
+        /// <param name="hashcode">value 的预计算哈希码。</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(string value, int hashcode)
         {
@@ -403,11 +388,11 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Implements <see cref="StringPool.GetOrAdd(string)"/> for the current instance.
+        /// 为当前实例实现 StringPool.GetOrAdd(string) 方法。
         /// </summary>
-        /// <param name="value">The input <see cref="string"/> instance with the contents to use.</param>
-        /// <param name="hashcode">The precomputed hashcode for <paramref name="value"/>.</param>
-        /// <returns>A <see cref="string"/> instance with the contents of <paramref name="value"/>.</returns>
+        /// <param name="value">包含要使用内容的输入字符串实例。</param>
+        /// <param name="hashcode">value 的预计算哈希码。</param>
+        /// <returns>具有 value 内容的字符串实例。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetOrAdd(string value, int hashcode)
         {
@@ -424,11 +409,11 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Implements <see cref="StringPool.GetOrAdd(ReadOnlySpan{char})"/> for the current instance.
+        /// 为当前实例实现 StringPool.GetOrAdd(ReadOnlySpan{char}) 方法。
         /// </summary>
-        /// <param name="span">The input <see cref="ReadOnlySpan{T}"/> with the contents to use.</param>
-        /// <param name="hashcode">The precomputed hashcode for <paramref name="span"/>.</param>
-        /// <returns>A <see cref="string"/> instance with the contents of <paramref name="span"/>, cached if possible.</returns>
+        /// <param name="span">包含要使用内容的输入 ReadOnlySpan。</param>
+        /// <param name="hashcode">span 的预计算哈希码。</param>
+        /// <returns>具有 span 内容的字符串实例，如果可能则已缓存。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetOrAdd(ReadOnlySpan<char> span, int hashcode)
         {
@@ -447,12 +432,12 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Implements <see cref="StringPool.TryGet"/> for the current instance.
+        /// 为当前实例实现 StringPool.TryGet 方法。
         /// </summary>
-        /// <param name="span">The input <see cref="ReadOnlySpan{T}"/> with the contents to use.</param>
-        /// <param name="hashcode">The precomputed hashcode for <paramref name="span"/>.</param>
-        /// <param name="value">The resulting cached <see cref="string"/> instance, if present</param>
-        /// <returns>Whether or not the target <see cref="string"/> instance was found.</returns>
+        /// <param name="span">包含要使用内容的输入 ReadOnlySpan。</param>
+        /// <param name="hashcode">span 的预计算哈希码。</param>
+        /// <param name="value">结果缓存的字符串实例（如果存在）。</param>
+        /// <returns>是否找到目标字符串实例。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGet(ReadOnlySpan<char> span, int hashcode, [NotNullWhen(true)] out string? value)
         {
@@ -471,7 +456,7 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Resets the current instance and throws away all the cached values.
+        /// 重置当前实例并丢弃所有缓存的值。
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
@@ -484,11 +469,11 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Tries to get a target <see cref="string"/> instance, if it exists, and returns a reference to it.
+        /// 尝试获取目标字符串实例（如果存在），并返回对它的引用。
         /// </summary>
-        /// <param name="span">The input <see cref="ReadOnlySpan{T}"/> with the contents to use.</param>
-        /// <param name="hashcode">The precomputed hashcode for <paramref name="span"/>.</param>
-        /// <returns>A reference to the slot where the target <see cref="string"/> instance could be.</returns>
+        /// <param name="span">包含要使用内容的输入 ReadOnlySpan。</param>
+        /// <param name="hashcode">span 的预计算哈希码。</param>
+        /// <returns>对可能包含目标字符串实例的槽的引用。</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private unsafe ref string TryGet(ReadOnlySpan<char> span, int hashcode)
         {
@@ -516,10 +501,10 @@ public sealed class StringPool
         }
 
         /// <summary>
-        /// Inserts a new <see cref="string"/> instance in the current map, freeing up a space if needed.
+        /// 在当前映射中插入新的字符串实例，如有需要释放空间。
         /// </summary>
-        /// <param name="value">The new <see cref="string"/> instance to store.</param>
-        /// <param name="hashcode">The precomputed hashcode for <paramref name="value"/>.</param>
+        /// <param name="value">要存储的新字符串实例。</param>
+        /// <param name="hashcode">value 的预计算哈希码。</param>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void Insert(string value, int hashcode)
         {
@@ -528,9 +513,8 @@ public sealed class StringPool
             ref HeapEntry heapEntriesRef = ref this.heapEntries.DangerousGetReference();
             int entryIndex, heapIndex;
 
-            // If the current map is full, first get the oldest value, which is
-            // always the first item in the heap. Then, free up a slot by
-            // removing that, and insert the new value in that empty location.
+            // 如果当前映射已满，首先获取最旧的值，即堆中的第一个项目
+            // 然后，通过删除该值来释放槽，并在该空槽中插入新值
             if (this.count == this.mapEntries.Length)
             {
                 entryIndex = heapEntriesRef.MapIndex;
@@ -538,16 +522,15 @@ public sealed class StringPool
 
                 ref MapEntry removedEntry = ref Unsafe.Add(ref mapEntriesRef, (nint)(uint)entryIndex);
 
-                // The removal logic can be extremely optimized in this case, as we
-                // can retrieve the precomputed hashcode for the target entry by doing
-                // a lookup on the target map node, and we can also skip all the comparisons
-                // while traversing the target chain since we know in advance the index of
-                // the target node which will contain the item to remove from the map.
+                // 在这种情况下，移除逻辑可以被极大优化，因为我们可以
+                // 通过在目标映射节点上查找来检索目标条目的预计算哈希码，
+                // 并且我们还可以跳过遍历目标链时的所有比较，因为我们预先知道
+                // 包含要从映射中删除的项目的节点的索引。
                 Remove(removedEntry.HashCode, entryIndex);
             }
             else
             {
-                // If the free list is not empty, get that map node and update the field
+                // 如果空闲列表不为空，获取该映射节点并更新字段
                 entryIndex = this.count;
                 heapIndex = this.count;
             }
@@ -557,29 +540,29 @@ public sealed class StringPool
             ref MapEntry targetMapEntry = ref Unsafe.Add(ref mapEntriesRef, (nint)(uint)entryIndex);
             ref HeapEntry targetHeapEntry = ref Unsafe.Add(ref heapEntriesRef, (nint)(uint)heapIndex);
 
-            // Assign the values in the new map entry
+            // 分配新映射条目中的值
             targetMapEntry.HashCode = hashcode;
             targetMapEntry.Value = value;
             targetMapEntry.NextIndex = targetBucket - 1;
             targetMapEntry.HeapIndex = heapIndex;
 
-            // Update the bucket slot and the current count
+            // 更新桶槽和当前计数
             targetBucket = entryIndex + 1;
             this.count++;
 
-            // Link the heap node with the current entry
+            // 将堆节点与当前条目链接
             targetHeapEntry.MapIndex = entryIndex;
 
-            // Update the timestamp and balance the heap again
+            // 更新时间戳并重新平衡堆
             UpdateTimestamp(ref targetMapEntry.HeapIndex);
         }
 
         /// <summary>
-        /// Removes a specified <see cref="string"/> instance from the map to free up one slot.
+        /// 从映射中移除指定的字符串实例以释放一个槽。
         /// </summary>
-        /// <param name="hashcode">The precomputed hashcode of the instance to remove.</param>
-        /// <param name="mapIndex">The index of the target map node to remove.</param>
-        /// <remarks>The input <see cref="string"/> instance needs to already exist in the map.</remarks>
+        /// <param name="hashcode">要移除实例的预计算哈希码。</param>
+        /// <param name="mapIndex">要移除的目标映射节点的索引。</param>
+        /// <remarks>字符串实例需要已经存在于映射中。</remarks>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void Remove(int hashcode, int mapIndex)
         {
@@ -588,16 +571,16 @@ public sealed class StringPool
             int entryIndex = this.buckets.DangerousGetReferenceAt(bucketIndex) - 1;
             int lastIndex = EndOfList;
 
-            // We can just have an undefined loop, as the input
-            // value we're looking for is guaranteed to be present
+            // 我们可以只使用未定义的循环，因为我们要查找的输入值
+            // 保证存在于映射中
             while (true)
             {
                 ref MapEntry candidate = ref Unsafe.Add(ref mapEntriesRef, (nint)(uint)entryIndex);
 
-                // Check the current value for a match
+                // 检查当前值是否匹配
                 if (entryIndex == mapIndex)
                 {
-                    // If this was not the first list node, update the parent as well
+                    // 如果这不是第一个列表节点，也更新父节点
                     if (lastIndex != EndOfList)
                     {
                         ref MapEntry lastEntry = ref Unsafe.Add(ref mapEntriesRef, (nint)(uint)lastIndex);
@@ -606,7 +589,7 @@ public sealed class StringPool
                     }
                     else
                     {
-                        // Otherwise, update the target index from the bucket slot
+                        // 否则，从桶槽更新目标索引
                         this.buckets.DangerousGetReferenceAt(bucketIndex) = candidate.NextIndex + 1;
                     }
 
@@ -615,16 +598,16 @@ public sealed class StringPool
                     return;
                 }
 
-                // Move to the following node in the current list
+                // 移动到当前列表中的下一个节点
                 lastIndex = entryIndex;
                 entryIndex = candidate.NextIndex;
             }
         }
 
         /// <summary>
-        /// Updates the timestamp of a heap node at the specified index (which is then synced back).
+        /// 更新指定索引处的堆节点的时间戳（然后同步回）。
         /// </summary>
-        /// <param name="heapIndex">The index of the target heap node to update.</param>
+        /// <param name="heapIndex">要更新的目标堆节点的索引。</param>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void UpdateTimestamp(ref int heapIndex)
         {
@@ -635,52 +618,42 @@ public sealed class StringPool
             ref HeapEntry root = ref Unsafe.Add(ref heapEntriesRef, (nint)(uint)currentIndex);
             uint timestamp = this.timestamp;
 
-            // Check if incrementing the current timestamp for the heap node to update
-            // would result in an overflow. If that happened, we could end up violating
-            // the min-heap property (the value of each node has to always be <= than that
-            // of its child nodes), eg. if we were updating a node that was not the root.
-            // In that scenario, we could end up with a node somewhere along the heap with
-            // a value lower than that of its parent node (as the timestamp would be 0).
-            // To guard against this, we just check the current timestamp value, and if
-            // the maximum value has been reached, we reinitialize the entire heap. This
-            // is done in a non-inlined call, so we don't increase the codegen size in this
-            // method. The reinitialization simply traverses the heap in breadth-first order
-            // (ie. level by level), and assigns incrementing timestamps to all nodes starting
-            // from 0. The value of the current timestamp is then just set to the current size.
+            // 检查增加要更新的堆节点的当前时间戳是否会导致溢出
+            // 如果发生这种情况，我们可能会违反最小堆属性（每个节点的值必须始终<=其子节点的值）
+            // 例如，如果我们在更新非根节点，则可能发生这种情况
+            // 在这种情况下，我们可能会得到一个值小于其父节点值的节点
+            // 为了避免这种情况，我们只需检查当前时间戳值，如果达到最大值，
+            // 我们将重新初始化整个堆。这是在一个非内联调用中完成的，所以不会增加此方法中的代码生成大小
+            // 重新初始化只需按广度优先顺序（即逐层）遍历堆，并从0开始为所有节点分配递增的时间戳
+            // 当前时间戳的值然后仅设置为当前大小
             if (timestamp == uint.MaxValue)
             {
-                // We use a goto here as this path is very rarely taken. Doing so
-                // causes the generated asm to contain a forward jump to the fallback
-                // path if this branch is taken, whereas the normal execution path will
-                // not need to execute any jumps at all. This is done to reduce the overhead
-                // introduced by this check in all the invocations where this point is not reached.
+                // 我们在这里使用 goto，因为很少采用此路径。这样做
+                // 会导致生成的汇编代码在采用此分支时包含一个前向跳转到回退路径
+                // 而正常执行路径则不需要执行任何跳转。这是为了减少在此处未达到此点的所有调用中引入的开销
                 goto Fallback;
             }
 
             Downheap:
 
-            // Assign a new timestamp to the target heap node. We use a
-            // local incremental timestamp instead of using the system timer
-            // as this greatly reduces the overhead and the time spent in system calls.
-            // The uint type provides a large enough range and it's unlikely users would ever
-            // exhaust it anyway (especially considering each map has a separate counter).
+            // 为要更新的堆节点分配新时间戳。我们使用本地递增时间戳而不是使用系统计时器
+            // 因为这大大减少了开销和系统调用的时间。uint 类型提供了足够大的范围，
+            // 并且用户不太可能耗尽它（特别是考虑到每个映射都有一个单独的计数器）
             root.Timestamp = this.timestamp = timestamp + 1;
 
-            // Once the timestamp is updated (which will cause the heap to become
-            // unbalanced), start a sift down loop to balance the heap again.
+            // 一旦时间戳更新（这将导致堆变得不平衡），开始下沉循环以再次平衡堆
             while (true)
             {
-                // The heap is 0-based (so that the array length can remain the same
-                // as the power of 2 value used for the other arrays in this type).
-                // This means that children of each node are at positions:
-                //   - left: (2 * n) + 1
-                //   - right: (2 * n) + 2
+                // 堆是0索引的（以便数组长度可以保持与该类型中其他数组使用的2的幂值相同）
+                // 这意味着每个节点的子节点位于位置：
+                //   - 左：(2 * n) + 1
+                //   - 右：(2 * n) + 2
                 ref HeapEntry minimum = ref root;
                 int left = (currentIndex * 2) + 1;
                 int right = (currentIndex * 2) + 2;
                 int targetIndex = currentIndex;
 
-                // Check and update the left child, if necessary
+                // 检查并更新左子节点（如需要）
                 if (left < count)
                 {
                     ref HeapEntry child = ref Unsafe.Add(ref heapEntriesRef, (nint)(uint)left);
@@ -692,7 +665,7 @@ public sealed class StringPool
                     }
                 }
 
-                // Same check as above for the right child
+                // 与上面相同的右子节点检查
                 if (right < count)
                 {
                     ref HeapEntry child = ref Unsafe.Add(ref heapEntriesRef, (nint)(uint)right);
@@ -704,8 +677,8 @@ public sealed class StringPool
                     }
                 }
 
-                // If no swap is pending, we can just stop here.
-                // Before returning, we update the target index as well.
+                // 如果没有待处理的交换，我们可以在此停止
+                // 返回前，我们更新目标索引
                 if (Unsafe.AreSame(ref root, ref minimum))
                 {
                     heapIndex = targetIndex;
@@ -713,19 +686,19 @@ public sealed class StringPool
                     return;
                 }
 
-                // Update the indices in the respective map entries (accounting for the swap)
+                // 更新相应映射条目中的索引（考虑交换）
                 Unsafe.Add(ref mapEntriesRef, (nint)(uint)root.MapIndex).HeapIndex = targetIndex;
                 Unsafe.Add(ref mapEntriesRef, (nint)(uint)minimum.MapIndex).HeapIndex = currentIndex;
 
                 currentIndex = targetIndex;
 
-                // Swap the parent and child (so that the minimum value bubbles up)
+                // 交换父节点和子节点（使最小值上浮）
                 HeapEntry temp = root;
 
                 root = minimum;
                 minimum = temp;
 
-                // Update the reference to the root node
+                // 更新对根节点的引用
                 root = ref Unsafe.Add(ref heapEntriesRef, (nint)(uint)currentIndex);
             }
 
@@ -733,20 +706,18 @@ public sealed class StringPool
 
             UpdateAllTimestamps();
 
-            // After having updated all the timestamps, if the heap contains N items, the
-            // node in the bottom right corner will have a value of N - 1. Since the timestamp
-            // is incremented by 1 before starting the downheap execution, here we simply
-            // update the local timestamp to be N - 1, so that the code above will set the
-            // timestamp of the node currently being updated to exactly N.
+            // 在更新所有时间戳后，如果堆包含N个项目，则右下角的节点将具有N-1的值
+            // 由于在开始下沉执行之前时间戳会增加1，这里我们简单地将本地时间戳
+            // 更新为N-1，以便上面的代码将当前更新的节点的时间戳设置为恰好N
             timestamp = (uint)(count - 1);
 
             goto Downheap;
         }
 
         /// <summary>
-        /// Updates the timestamp of all the current heap nodes in incrementing order.
-        /// The heap is always guaranteed to be complete binary tree, so when it contains
-        /// a given number of nodes, those are all contiguous from the start of the array.
+        /// 按递增顺序更新所有当前堆节点的时间戳。
+        /// 堆始终保证是完全二叉树，因此当它包含给定数量的节点时，
+        /// 这些节点都从数组的开始处连续排列。
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private readonly void UpdateAllTimestamps()
@@ -762,10 +733,10 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Gets the (positive) hashcode for a given <see cref="ReadOnlySpan{T}"/> instance.
+    /// 获取给定 ReadOnlySpan 实例的（正）哈希码。
     /// </summary>
-    /// <param name="span">The input <see cref="ReadOnlySpan{T}"/> instance.</param>
-    /// <returns>The hashcode for <paramref name="span"/>.</returns>
+    /// <param name="span">输入的 ReadOnlySpan 实例。</param>
+    /// <returns>span 的哈希码。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetHashCode(ReadOnlySpan<char> span)
     {
@@ -773,10 +744,11 @@ public sealed class StringPool
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentException"/> when the requested size exceeds the capacity.
+    /// 当请求的大小超过容量时抛出 ArgumentException。
     /// </summary>
     private static void ThrowArgumentOutOfRangeException()
     {
+		// "请求的大小必须大于0"
         throw new ArgumentOutOfRangeException("minimumSize", "The requested size must be greater than 0");
     }
 }

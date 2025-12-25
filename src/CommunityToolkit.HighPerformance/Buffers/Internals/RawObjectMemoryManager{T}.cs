@@ -13,32 +13,32 @@ using CommunityToolkit.HighPerformance.Helpers;
 namespace CommunityToolkit.HighPerformance.Buffers.Internals;
 
 /// <summary>
-/// A custom <see cref="MemoryManager{T}"/> that can wrap arbitrary <see cref="object"/> instances.
+/// 一个自定义的 <see cref="MemoryManager{T}"/>，可以包装任意的 <see cref="object"/> 实例。
 /// </summary>
-/// <typeparam name="T">The type of elements in the target memory area.</typeparam>
+/// <typeparam name="T">目标内存区域中元素的类型。</typeparam>
 internal sealed class RawObjectMemoryManager<T> : MemoryManager<T>
 {
     /// <summary>
-    /// The target <see cref="object"/> instance.
+    /// 目标 <see cref="object"/> 实例。
     /// </summary>
     private readonly object instance;
 
     /// <summary>
-    /// The initial offset within <see cref="instance"/>.
+    /// 在 <see cref="instance"/> 中的初始偏移量。
     /// </summary>
     private readonly IntPtr offset;
 
     /// <summary>
-    /// The length of the target memory area.
+    /// 目标内存区域的长度。
     /// </summary>
     private readonly int length;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RawObjectMemoryManager{T}"/> class.
+    /// 初始化 <see cref="RawObjectMemoryManager{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="instance">The target <see cref="object"/> instance.</param>
-    /// <param name="offset">The starting offset within <paramref name="instance"/>.</param>
-    /// <param name="length">The usable length within <paramref name="instance"/>.</param>
+    /// <param name="instance">目标 <see cref="object"/> 实例。</param>
+    /// <param name="offset">在 <paramref name="instance"/> 中的起始偏移量。</param>
+    /// <param name="length">在 <paramref name="instance"/> 中的可用长度。</param>
     public RawObjectMemoryManager(object instance, IntPtr offset, int length)
     {
         this.instance = instance;
@@ -46,7 +46,10 @@ internal sealed class RawObjectMemoryManager<T> : MemoryManager<T>
         this.length = length;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取一个表示当前内存管理器所管理内存区域的 Span<T> 对象
+    /// </summary>
+    /// <returns>表示当前内存管理器所管理内存区域的 Span<T> 对象</returns>
     public override Span<T> GetSpan()
     {
         ref T r0 = ref ObjectMarshal.DangerousGetObjectDataReferenceAt<T>(this.instance, this.offset);
@@ -54,7 +57,11 @@ internal sealed class RawObjectMemoryManager<T> : MemoryManager<T>
         return MemoryMarshal.CreateSpan(ref r0, this.length);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 固定内存中的指定元素并返回一个 MemoryHandle
+    /// </summary>
+    /// <param name="elementIndex">要固定的元素的索引，默认为 0</param>
+    /// <returns>表示固定内存的 MemoryHandle</returns>
     public override unsafe MemoryHandle Pin(int elementIndex = 0)
     {
         if ((uint)elementIndex >= (uint)this.length)
@@ -62,11 +69,9 @@ internal sealed class RawObjectMemoryManager<T> : MemoryManager<T>
             ThrowArgumentOutOfRangeExceptionForInvalidElementIndex();
         }
 
-        // Allocating a pinned handle for the array with fail and throw an exception
-        // if the array contains non blittable data. This is the expected behavior and
-        // the same happens when trying to pin a Memory<T> instance obtained through
-        // traditional means (eg. via the implicit T[] array conversion), if T is a
-        // reference type or a type containing some references.
+        // 为包含非可直接复制数据的数组分配固定句柄会失败并抛出异常
+        // 这是预期行为，当尝试固定通过传统方式（例如通过隐式 T[] 数组转换）获取的 Memory<T> 实例时
+        // 如果 T 是引用类型或包含引用的类型，也会发生同样的情况
         GCHandle handle = GCHandle.Alloc(this.instance, GCHandleType.Pinned);
         ref T r0 = ref ObjectMarshal.DangerousGetObjectDataReferenceAt<T>(this.instance, this.offset);
         ref T r1 = ref Unsafe.Add(ref r0, (nint)(uint)elementIndex);
@@ -75,18 +80,23 @@ internal sealed class RawObjectMemoryManager<T> : MemoryManager<T>
         return new(p, handle);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 取消固定之前固定的内存
+    /// </summary>
     public override void Unpin()
     {
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 释放当前对象所占用的资源
+    /// </summary>
+    /// <param name="disposing">是否正在释放资源</param>
     protected override void Dispose(bool disposing)
     {
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the input index for <see cref="Pin"/> is not valid.
+    /// 当 <see cref="Pin"/> 的输入索引无效时，抛出 <see cref="ArgumentOutOfRangeException"/> 异常
     /// </summary>
     private static void ThrowArgumentOutOfRangeExceptionForInvalidElementIndex()
     {

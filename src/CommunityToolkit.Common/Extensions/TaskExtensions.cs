@@ -12,26 +12,27 @@ using System.Threading.Tasks;
 namespace CommunityToolkit.Common;
 
 /// <summary>
-/// Helpers for working with tasks.
+/// 用于处理任务的帮助类。
 /// </summary>
 public static class TaskExtensions
 {
     /// <summary>
-    /// Gets the result of a <see cref="Task"/> if available, or <see langword="null"/> otherwise.
+    /// 如果可用，则获取 <see cref="Task"/> 的结果，否则返回 <see langword="null"/>。
     /// </summary>
-    /// <param name="task">The input <see cref="Task"/> instance to get the result for.</param>
-    /// <returns>The result of <paramref name="task"/> if completed successfully, or <see langword="default"/> otherwise.</returns>
+    /// <param name="task">要获取结果的输入 <see cref="Task"/> 实例。</param>
+    /// <returns>如果 task 成功完成，则返回 <paramref name="task"/> 的结果，否则返回 <see langword="default"/>。</returns>
     /// <remarks>
-    /// This method does not block if <paramref name="task"/> has not completed yet. Furthermore, it is not generic
-    /// and uses reflection to access the <see cref="Task{TResult}.Result"/> property and boxes the result if it's
-    /// a value type, which adds overhead. It should only be used when using generics is not possible.
+    /// 此方法不会在 <paramref name="task"/> 尚未完成时阻塞。此外，它不是泛型的，
+    /// 并使用反射访问 <see cref="Task{TResult}.Result"/> 属性，如果结果是值类型，则会装箱，这会增加开销。
+    /// 只有在无法使用泛型时才应使用它。
     /// </remarks>
 #if NET6_0_OR_GREATER
+	// "此方法使用反射来尝试访问输入 Task 实例的 Task<T>.Result 属性。"
     [RequiresUnreferencedCode("This method uses reflection to try to access the Task<T>.Result property of the input Task instance.")]
 #endif
     public static object? GetResultOrDefault(this Task task)
     {
-        // Check if the instance is a completed Task
+        // 检查实例是否为已完成的 Task
         if (
 #if NETSTANDARD2_1
             task.IsCompletedSuccessfully
@@ -40,21 +41,21 @@ public static class TaskExtensions
 #endif
             )
         {
-            // We need an explicit check to ensure the input task is not the cached
-            // Task.CompletedTask instance, because that can internally be stored as
-            // a Task<T> for some given T (eg. on .NET 6 it's VoidTaskResult), which
-            // would cause the following code to return that result instead of null.
+            // 我们需要显式检查以确保输入任务不是缓存的
+            // Task.CompletedTask 实例，因为这在内部可以存储为
+            // Task<T>（例如，在 .NET 6 上是 VoidTaskResult），这
+            // 会导致以下代码返回该结果而不是 null。
             if (task != Task.CompletedTask)
             {
-                // Try to get the Task<T>.Result property. This method would've
-                // been called anyway after the type checks, but using that to
-                // validate the input type saves some additional reflection calls.
-                // Furthermore, doing this also makes the method flexible enough to
-                // cases whether the input Task<T> is actually an instance of some
-                // runtime-specific type that inherits from Task<T>.
+                // 尝试获取 Task<T>.Result 属性。此方法无论如何
+                // 都会在类型检查后被调用，但使用它
+                // 来验证输入类型可以节省一些额外的反射调用。
+                // 此外，这样做还使该方法足够灵活
+                // 以处理输入 Task<T> 实际上是某些
+                // 继承自 Task<T> 的特定运行时类型实例的情况。
                 PropertyInfo? propertyInfo = task.GetType().GetProperty(nameof(Task<object>.Result));
 
-                // Return the result, if possible
+                // 返回结果（如果可能）
                 return propertyInfo?.GetValue(task);
             }
         }
@@ -63,12 +64,12 @@ public static class TaskExtensions
     }
 
     /// <summary>
-    /// Gets the result of a <see cref="Task{TResult}"/> if available, or <see langword="default"/> otherwise.
+    /// 如果可用，则获取 <see cref="Task{TResult}"/> 的结果，否则返回 <see langword="default"/>。
     /// </summary>
-    /// <typeparam name="T">The type of <see cref="Task{TResult}"/> to get the result for.</typeparam>
-    /// <param name="task">The input <see cref="Task{TResult}"/> instance to get the result for.</param>
-    /// <returns>The result of <paramref name="task"/> if completed successfully, or <see langword="default"/> otherwise.</returns>
-    /// <remarks>This method does not block if <paramref name="task"/> has not completed yet.</remarks>
+    /// <typeparam name="T">要获取结果的 <see cref="Task{TResult}"/> 类型。</typeparam>
+    /// <param name="task">要获取结果的输入 <see cref="Task{TResult}"/> 实例。</param>
+    /// <returns>如果 task 成功完成，则返回 <paramref name="task"/> 的结果，否则返回 <see langword="default"/>。</returns>
+    /// <remarks>此方法不会在 <paramref name="task"/> 尚未完成时阻塞。</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T? GetResultOrDefault<T>(this Task<T?> task)
     {

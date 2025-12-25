@@ -11,26 +11,26 @@ using System.Runtime.InteropServices;
 namespace CommunityToolkit.HighPerformance.Enumerables;
 
 /// <summary>
-/// A <see langword="ref"/> <see langword="struct"/> that enumerates the items in a given <see cref="ReadOnlySpan{T}"/> instance.
+/// 一个枚举给定 ReadOnlySpan{T} 实例中元素的 ref 结构体
 /// </summary>
-/// <typeparam name="T">The type of items to enumerate.</typeparam>
+/// <typeparam name="T">要枚举的元素类型</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public ref struct ReadOnlySpanEnumerable<T>
 {
     /// <summary>
-    /// The source <see cref="ReadOnlySpan{T}"/> instance.
+    /// 源 ReadOnlySpan{T} 实例
     /// </summary>
     private readonly ReadOnlySpan<T> span;
 
     /// <summary>
-    /// The current index within <see cref="span"/>.
+    /// 当前在 span 中的索引
     /// </summary>
     private int index;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReadOnlySpanEnumerable{T}"/> struct.
+    /// 初始化 ReadOnlySpanEnumerable{T} 结构体的新实例
     /// </summary>
-    /// <param name="span">The source <see cref="ReadOnlySpan{T}"/> instance.</param>
+    /// <param name="span">源 ReadOnlySpan{T} 实例</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpanEnumerable(ReadOnlySpan<T> span)
     {
@@ -39,16 +39,16 @@ public ref struct ReadOnlySpanEnumerable<T>
     }
 
     /// <summary>
-    /// Implements the duck-typed <see cref="IEnumerable{T}.GetEnumerator"/> method.
+    /// 实现鸭式类型化的 IEnumerable{T}.GetEnumerator 方法
     /// </summary>
-    /// <returns>An <see cref="ReadOnlySpanEnumerable{T}"/> instance targeting the current <see cref="ReadOnlySpan{T}"/> value.</returns>
+    /// <returns>针对当前 ReadOnlySpan{T} 值的 ReadOnlySpanEnumerable{T} 实例</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly ReadOnlySpanEnumerable<T> GetEnumerator() => this;
 
     /// <summary>
-    /// Implements the duck-typed <see cref="System.Collections.IEnumerator.MoveNext"/> method.
+    /// 实现鸭式类型化的 System.Collections.IEnumerator.MoveNext 方法
     /// </summary>
-    /// <returns><see langword="true"/> whether a new element is available, <see langword="false"/> otherwise</returns>
+    /// <returns>如果新元素可用则为 true，否则为 false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool MoveNext()
     {
@@ -56,7 +56,7 @@ public ref struct ReadOnlySpanEnumerable<T>
     }
 
     /// <summary>
-    /// Gets the duck-typed <see cref="IEnumerator{T}.Current"/> property.
+    /// 获取鸭式类型化的 IEnumerator{T}.Current 属性
     /// </summary>
     public readonly Item Current
     {
@@ -76,34 +76,34 @@ public ref struct ReadOnlySpanEnumerable<T>
     }
 
     /// <summary>
-    /// An item from a source <see cref="Span{T}"/> instance.
+    /// 一个来自源 Span{T} 实例的项
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public readonly ref struct Item
     {
 #if NET8_0_OR_GREATER
         /// <summary>
-        /// The <typeparamref name="T"/> reference for the <see cref="Item"/> instance.
+        /// Item 实例的 T 引用
         /// </summary>
         private readonly ref readonly T reference;
 
         /// <summary>
-        /// The index of the current <see cref="Item"/> instance.
+        /// 当前 Item 实例的索引
         /// </summary>
         private readonly int index;
 #else
         /// <summary>
-        /// The source <see cref="ReadOnlySpan{T}"/> instance.
+        /// 源 ReadOnlySpan{T} 实例
         /// </summary>
         private readonly ReadOnlySpan<T> span;
 #endif
 
 #if NETSTANDARD2_1_OR_GREATER
         /// <summary>
-        /// Initializes a new instance of the <see cref="Item"/> struct.
+        /// 初始化 Item 结构体的新实例
         /// </summary>
-        /// <param name="value">A reference to the target value.</param>
-        /// <param name="index">The index of the target value.</param>
+        /// <param name="value">指向目标值的引用</param>
+        /// <param name="index">目标值的索引</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Item(ref T value, int index)
         {
@@ -116,15 +116,15 @@ public ref struct ReadOnlySpanEnumerable<T>
         }
 #else
         /// <summary>
-        /// The current index within <see cref="span"/>.
+        /// 当前在 span 中的索引
         /// </summary>
         private readonly int index;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Item"/> struct.
+        /// 初始化 Item 结构体的新实例
         /// </summary>
-        /// <param name="span">The source <see cref="ReadOnlySpan{T}"/> instance.</param>
-        /// <param name="index">The current index within <paramref name="span"/>.</param>
+        /// <param name="span">源 ReadOnlySpan{T} 实例</param>
+        /// <param name="index">span 中的当前索引</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Item(ReadOnlySpan<T> span, int index)
         {
@@ -134,7 +134,7 @@ public ref struct ReadOnlySpanEnumerable<T>
 #endif
 
         /// <summary>
-        /// Gets the reference to the current value.
+        /// 获取对当前值的引用
         /// </summary>
         public ref readonly T Value
         {
@@ -155,7 +155,7 @@ public ref struct ReadOnlySpanEnumerable<T>
         }
 
         /// <summary>
-        /// Gets the current index.
+        /// 获取当前索引
         /// </summary>
         public int Index
         {

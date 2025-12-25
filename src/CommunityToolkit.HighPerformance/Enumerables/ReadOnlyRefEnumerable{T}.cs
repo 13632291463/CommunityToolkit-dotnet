@@ -16,57 +16,57 @@ using RuntimeHelpers = CommunityToolkit.HighPerformance.Helpers.Internals.Runtim
 namespace CommunityToolkit.HighPerformance.Enumerables;
 
 /// <summary>
-/// A <see langword="ref"/> <see langword="struct"/> that iterates readonly items from arbitrary memory locations.
+/// 一个遍历只读项的 ref 结构体，用于从任意内存位置进行枚举
 /// </summary>
-/// <typeparam name="T">The type of items to enumerate.</typeparam>
+/// <typeparam name="T">要枚举的元素类型</typeparam>
 public readonly ref struct ReadOnlyRefEnumerable<T>
 {
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// The <typeparamref name="T"/> reference for the <see cref="ReadOnlyRefEnumerable{T}"/> instance.
+    /// ReadOnlyRefEnumerable{T} 实例的 T 类型引用
     /// </summary>
     private readonly ref readonly T reference;
 
     /// <summary>
-    /// The length of the current sequence.
+    /// 当前序列的长度
     /// </summary>
     private readonly int length;
 #elif NETSTANDARD2_1_OR_GREATER
     /// <summary>
-    /// The <see cref="ReadOnlySpan{T}"/> instance pointing to the first item in the target memory area.
+    /// 指向目标内存区域第一个元素的 ReadOnlySpan{T} 实例
     /// </summary>
-    /// <remarks>The <see cref="ReadOnlySpan{T}.Length"/> field maps to the total available length.</remarks>
+    /// <remarks>ReadOnlySpan{T}.Length 字段映射到可用总长度</remarks>
     private readonly ReadOnlySpan<T> span;
 #else
     /// <summary>
-    /// The target <see cref="object"/> instance, if present.
+    /// 目标对象实例（如果存在）
     /// </summary>
     private readonly object? instance;
 
     /// <summary>
-    /// The initial offset within <see cref="instance"/>.
+    /// instance 中的初始偏移量
     /// </summary>
     private readonly IntPtr offset;
 
     /// <summary>
-    /// The total available length for the sequence.
+    /// 序列的总可用长度
     /// </summary>
     private readonly int length;
 #endif
 
     /// <summary>
-    /// The distance between items in the sequence to enumerate.
+    /// 要枚举的序列中元素之间的距离
     /// </summary>
-    /// <remarks>The distance refers to <typeparamref name="T"/> items, not byte offset.</remarks>
+    /// <remarks>距离指的是 T 类型元素，而不是字节偏移</remarks>
     private readonly int step;
 
 #if NETSTANDARD2_1_OR_GREATER
 #if !NET8_0_OR_GREATER
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReadOnlyRefEnumerable{T}"/> struct.
+    /// 初始化 ReadOnlyRefEnumerable{T} 结构的新实例
     /// </summary>
-    /// <param name="span">The <see cref="ReadOnlySpan{T}"/> instance pointing to the first item in the target memory area.</param>
-    /// <param name="step">The distance between items in the sequence to enumerate.</param>
+    /// <param name="span">指向目标内存区域第一个元素的 ReadOnlySpan{T} 实例</param>
+    /// <param name="step">要枚举的序列中元素之间的距离</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ReadOnlyRefEnumerable(ReadOnlySpan<T> span, int step)
     {
@@ -81,11 +81,11 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
 #endif
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReadOnlyRefEnumerable{T}"/> struct.
+    /// 初始化 ReadOnlyRefEnumerable{T} 结构的新实例
     /// </summary>
-    /// <param name="reference">A reference to the first item of the sequence.</param>
-    /// <param name="length">The number of items in the sequence.</param>
-    /// <param name="step">The distance between items in the sequence to enumerate.</param>
+    /// <param name="reference">序列中第一个元素的引用</param>
+    /// <param name="length">序列中的元素数量</param>
+    /// <param name="step">要枚举的序列中元素之间的距离</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ReadOnlyRefEnumerable(in T reference, int length, int step)
     {
@@ -100,13 +100,13 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Creates a new instance of the <see cref="ReadOnlyRefEnumerable{T}"/> struct with the specified parameters.
+    /// 使用指定参数创建 ReadOnlyRefEnumerable{T} 结构的新实例
     /// </summary>
-    /// <param name="value">The reference to the first <typeparamref name="T"/> item to map.</param>
-    /// <param name="length">The number of items in the sequence.</param>
-    /// <param name="step">The distance between items in the sequence to enumerate.</param>
-    /// <returns>A <see cref="ReadOnlyRefEnumerable{T}"/> instance with the specified parameters.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when one of the parameters are negative.</exception>
+    /// <param name="value">要映射的第一个 T 类型元素的引用</param>
+    /// <param name="length">序列中的元素数量</param>
+    /// <param name="step">要枚举的序列中元素之间的距离</param>
+    /// <returns>使用指定参数的 ReadOnlyRefEnumerable{T} 实例</returns>
+    /// <exception cref="ArgumentOutOfRangeException">当参数为负数时抛出</exception>
     public static ReadOnlyRefEnumerable<T> DangerousCreate(in T value, int length, int step)
     {
         if (length < 0)
@@ -125,12 +125,12 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 #else
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReadOnlyRefEnumerable{T}"/> struct.
+    /// 初始化 ReadOnlyRefEnumerable{T} 结构的新实例
     /// </summary>
-    /// <param name="instance">The target <see cref="object"/> instance.</param>
-    /// <param name="offset">The initial offset within <see paramref="instance"/>.</param>
-    /// <param name="length">The number of items in the sequence.</param>
-    /// <param name="step">The distance between items in the sequence to enumerate.</param>
+    /// <param name="instance">目标对象实例</param>
+    /// <param name="offset">instance 中的初始偏移量</param>
+    /// <param name="length">序列中的元素数量</param>
+    /// <param name="step">要枚举的序列中元素之间的距离</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ReadOnlyRefEnumerable(object? instance, IntPtr offset, int length, int step)
     {
@@ -142,7 +142,7 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
 #endif
 
     /// <summary>
-    /// Gets the total available length for the sequence.
+    /// 获取序列的总可用长度
     /// </summary>
     public int Length
     {
@@ -157,12 +157,12 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Gets the element at the specified zero-based index.
+    /// 获取指定零基索引处的元素
     /// </summary>
-    /// <param name="index">The zero-based index of the element.</param>
-    /// <returns>A reference to the element at the specified index.</returns>
+    /// <param name="index">元素的零基索引</param>
+    /// <returns>指定索引处元素的引用</returns>
     /// <exception cref="IndexOutOfRangeException">
-    /// Thrown when <paramref name="index"/> is invalid.
+    /// 当 index 参数无效时抛出
     /// </exception>
     public ref readonly T this[int index]
     {
@@ -190,12 +190,12 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
 
 #if NETSTANDARD2_1_OR_GREATER
     /// <summary>
-    /// Gets the element at the specified zero-based index.
+    /// 获取指定零基索引处的元素
     /// </summary>
-    /// <param name="index">The zero-based index of the element.</param>
-    /// <returns>A reference to the element at the specified index.</returns>
+    /// <param name="index">元素的零基索引</param>
+    /// <returns>指定索引处元素的引用</returns>
     /// <exception cref="IndexOutOfRangeException">
-    /// Thrown when <paramref name="index"/> is invalid.
+    /// 当 index 参数无效时抛出
     /// </exception>
     public ref readonly T this[Index index]
     {
@@ -218,11 +218,11 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Copies the contents of this <see cref="ReadOnlyRefEnumerable{T}"/> into a destination <see cref="RefEnumerable{T}"/> instance.
+    /// 将此 ReadOnlyRefEnumerable{T} 的内容复制到目标 RefEnumerable{T} 实例
     /// </summary>
-    /// <param name="destination">The destination <see cref="RefEnumerable{T}"/> instance.</param>
+    /// <param name="destination">目标 RefEnumerable{T} 实例</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="destination"/> is shorter than the source <see cref="ReadOnlyRefEnumerable{T}"/> instance.
+    /// 当 destination 比源 ReadOnlyRefEnumerable{T} 实例短时抛出
     /// </exception>
     public void CopyTo(RefEnumerable<T> destination)
     {
@@ -280,10 +280,10 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Attempts to copy the current <see cref="ReadOnlyRefEnumerable{T}"/> instance to a destination <see cref="RefEnumerable{T}"/>.
+    /// 尝试将当前 ReadOnlyRefEnumerable{T} 实例复制到目标 RefEnumerable{T}
     /// </summary>
-    /// <param name="destination">The target <see cref="RefEnumerable{T}"/> of the copy operation.</param>
-    /// <returns>Whether or not the operation was successful.</returns>
+    /// <param name="destination">复制操作的目标 RefEnumerable{T}</param>
+    /// <returns>操作是否成功</returns>
     public bool TryCopyTo(RefEnumerable<T> destination)
     {
 #if NET8_0_OR_GREATER
@@ -308,11 +308,11 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Copies the contents of this <see cref="RefEnumerable{T}"/> into a destination <see cref="Span{T}"/> instance.
+    /// 将此 RefEnumerable{T} 的内容复制到目标 Span{T} 实例
     /// </summary>
-    /// <param name="destination">The destination <see cref="Span{T}"/> instance.</param>
+    /// <param name="destination">目标 Span{T} 实例</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="destination"/> is shorter than the source <see cref="RefEnumerable{T}"/> instance.
+    /// 当 destination 比源 RefEnumerable{T} 实例短时抛出
     /// </exception>
     public void CopyTo(Span<T> destination)
     {
@@ -351,10 +351,10 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Attempts to copy the current <see cref="RefEnumerable{T}"/> instance to a destination <see cref="Span{T}"/>.
+    /// 尝试将当前 RefEnumerable{T} 实例复制到目标 Span{T}
     /// </summary>
-    /// <param name="destination">The target <see cref="Span{T}"/> of the copy operation.</param>
-    /// <returns>Whether or not the operation was successful.</returns>
+    /// <param name="destination">复制操作的目标 Span{T}</param>
+    /// <returns>操作是否成功</returns>
     public bool TryCopyTo(Span<T> destination)
     {
 #if NET8_0_OR_GREATER
@@ -386,7 +386,7 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
         int length = this.length;
 #endif
 
-        // Empty array if no data is mapped
+        // 如果没有数据则返回空数组
         if (length == 0)
         {
             return Array.Empty<T>();
@@ -400,9 +400,9 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Implicitly converts a <see cref="RefEnumerable{T}"/> instance into a <see cref="ReadOnlyRefEnumerable{T}"/> one.
+    /// 隐式转换 RefEnumerable{T} 实例为 ReadOnlyRefEnumerable{T} 实例
     /// </summary>
-    /// <param name="enumerable">The input <see cref="RefEnumerable{T}"/> instance.</param>
+    /// <param name="enumerable">输入的 RefEnumerable{T} 实例</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator ReadOnlyRefEnumerable<T>(RefEnumerable<T> enumerable)
     {
@@ -416,7 +416,7 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// A custom enumerator type to traverse items within a <see cref="ReadOnlyRefEnumerable{T}"/> instance.
+    /// 用于遍历 ReadOnlyRefEnumerable{T} 实例中项的自定义枚举器类型
     /// </summary>
     public ref struct Enumerator
     {
@@ -444,17 +444,17 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
         private readonly int step;
 
         /// <summary>
-        /// The current position in the sequence.
+        /// 序列中的当前位置
         /// </summary>
         private int position;
 
 #if NET8_0_OR_GREATER
         /// <summary>
-        /// Initializes a new instance of the <see cref="Enumerator"/> struct.
+        /// 初始化 Enumerator 结构的新实例
         /// </summary>
-        /// <param name="reference">The <typeparamref name="T"/> reference to the first item of the sequence.</param>
-        /// <param name="length">The length of the sequence.</param>
-        /// <param name="step">The distance between items in the sequence to enumerate.</param>
+        /// <param name="reference">序列第一个元素的 T 类型引用</param>
+        /// <param name="length">序列长度</param>
+        /// <param name="step">要枚举的序列中元素之间的距离</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Enumerator(in T reference, int length, int step)
         {
@@ -465,10 +465,10 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
         }
 #elif NETSTANDARD2_1_OR_GREATER
         /// <summary>
-        /// Initializes a new instance of the <see cref="Enumerator"/> struct.
+        /// 初始化 Enumerator 结构的新实例
         /// </summary>
-        /// <param name="span">The <see cref="ReadOnlySpan{T}"/> instance with the info on the items to traverse.</param>
-        /// <param name="step">The distance between items in the sequence to enumerate.</param>
+        /// <param name="span">包含要遍历项信息的 ReadOnlySpan{T} 实例</param>
+        /// <param name="step">要枚举的序列中元素之间的距离</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Enumerator(ReadOnlySpan<T> span, int step)
         {
@@ -478,12 +478,12 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
         }
 #else
         /// <summary>
-        /// Initializes a new instance of the <see cref="Enumerator"/> struct.
+        /// 初始化 Enumerator 结构的新实例
         /// </summary>
-        /// <param name="instance">The target <see cref="object"/> instance.</param>
-        /// <param name="offset">The initial offset within <see paramref="instance"/>.</param>
-        /// <param name="length">The number of items in the sequence.</param>
-        /// <param name="step">The distance between items in the sequence to enumerate.</param>
+        /// <param name="instance">目标对象实例</param>
+        /// <param name="offset">instance 中的初始偏移量</param>
+        /// <param name="length">序列中的元素数量</param>
+        /// <param name="step">要枚举的序列中元素之间的距离</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Enumerator(object? instance, IntPtr offset, int length, int step)
         {
@@ -531,7 +531,7 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
 
 #if NETSTANDARD2_1_OR_GREATER
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the "length" parameter is invalid.
+    /// 当 "length" 参数无效时抛出 ArgumentOutOfRangeException
     /// </summary>
     private static void ThrowArgumentOutOfRangeExceptionForLength()
     {
@@ -539,7 +539,7 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the "step" parameter is invalid.
+    /// 当 "step" 参数无效时抛出 ArgumentOutOfRangeException
     /// </summary>
     private static void ThrowArgumentOutOfRangeExceptionForStep()
     {
@@ -548,7 +548,7 @@ public readonly ref struct ReadOnlyRefEnumerable<T>
 #endif
 
     /// <summary>
-    /// Throws an <see cref="ArgumentException"/> when the target span is too short.
+    /// 当目标 span 太短时抛出 ArgumentException
     /// </summary>
     private static void ThrowArgumentExceptionForDestinationTooShort()
     {

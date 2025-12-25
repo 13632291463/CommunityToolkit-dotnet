@@ -8,42 +8,42 @@ using System.Buffers;
 namespace CommunityToolkit.HighPerformance.Buffers;
 
 /// <summary>
-/// An interface that expands <see cref="IBufferWriter{T}"/> with the ability to also inspect
-/// the written data, and to reset the underlying buffer to write again from the start.
+/// 一个接口，扩展了 <see cref="IBufferWriter{T}"/> 的功能，增加了检查已写入数据的能力，
+/// 并可以重置底层缓冲区以从头开始再次写入。
 /// </summary>
-/// <typeparam name="T">The type of items in the current buffer.</typeparam>
+/// <typeparam name="T">当前缓冲区中元素的类型。</typeparam>
 public interface IBuffer<T> : IBufferWriter<T>
 {
     /// <summary>
-    /// Gets the data written to the underlying buffer so far, as a <see cref="ReadOnlyMemory{T}"/>.
+    /// 获取到目前为止写入底层缓冲区的数据，作为 <see cref="ReadOnlyMemory{T}"/> 返回。
     /// </summary>
     ReadOnlyMemory<T> WrittenMemory { get; }
 
     /// <summary>
-    /// Gets the data written to the underlying buffer so far, as a <see cref="ReadOnlySpan{T}"/>.
+    /// 获取到目前为止写入底层缓冲区的数据，作为 <see cref="ReadOnlySpan{T}"/> 返回。
     /// </summary>
     ReadOnlySpan<T> WrittenSpan { get; }
 
     /// <summary>
-    /// Gets the amount of data written to the underlying buffer so far.
+    /// 获取到目前为止写入底层缓冲区的数据量。
     /// </summary>
     int WrittenCount { get; }
 
     /// <summary>
-    /// Gets the total amount of space within the underlying buffer.
+    /// 获取底层缓冲区内的总空间大小。
     /// </summary>
     int Capacity { get; }
 
     /// <summary>
-    /// Gets the amount of space available that can still be written into without forcing the underlying buffer to grow.
+    /// 获取仍可写入而不会强制底层缓冲区增长的空间量。
     /// </summary>
     int FreeCapacity { get; }
 
     /// <summary>
-    /// Clears the data written to the underlying buffer.
+    /// 清除写入底层缓冲区的数据。
     /// </summary>
     /// <remarks>
-    /// You must clear the <see cref="IBuffer{T}"/> instance before trying to re-use it.
+    /// 在尝试重新使用 <see cref="IBuffer{T}"/> 实例之前，必须先清除它。
     /// </remarks>
     void Clear();
 }

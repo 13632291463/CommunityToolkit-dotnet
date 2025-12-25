@@ -25,12 +25,14 @@ public static class ISettingsStorageHelperExtensions
     public static TValue? GetValueOrDefault<TKey, TValue>(this ISettingsStorageHelper<TKey> storageHelper, TKey key, TValue? fallback = default)
         where TKey : notnull
     {
+        // 尝试读取存储中的值
         if (storageHelper.TryRead(key, out TValue? storedValue))
         {
             return storedValue;
         }
         else
         {
+            // 如果未找到值，则返回默认值
             return fallback;
         }
     }
@@ -47,12 +49,14 @@ public static class ISettingsStorageHelperExtensions
     public static TValue? Read<TKey, TValue>(this ISettingsStorageHelper<TKey> storageHelper, TKey key)
         where TKey : notnull
     {
+        // 尝试读取存储中的值
         if (storageHelper.TryRead(key, out TValue? value))
         {
             return value;
         }
         else
         {
+            // 如果未找到值，则抛出异常
             ThrowKeyNotFoundException(key);
             return default;
         }
@@ -68,8 +72,10 @@ public static class ISettingsStorageHelperExtensions
     public static void Delete<TKey>(this ISettingsStorageHelper<TKey> storageHelper, TKey key)
         where TKey : notnull
     {
+        // 尝试删除存储中的键值对
         if (!storageHelper.TryDelete(key))
         {
+            // 如果未找到要删除的键，则抛出异常
             ThrowKeyNotFoundException(key);
         }
     }

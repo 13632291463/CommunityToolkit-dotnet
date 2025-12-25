@@ -8,59 +8,59 @@ using System.Threading.Tasks;
 namespace CommunityToolkit.Common.Helpers;
 
 /// <summary>
-/// Service interface used to store data in a directory/file-system via files and folders.
+/// 用于通过文件和文件夹在目录/文件系统中存储数据的服务接口。
 ///
-/// This interface is meant to help abstract file storage operations across platforms in a library,
-/// but the actual behavior will be up to the implementer. Such as, we don't provide a sense of a current directory,
-/// so an implementor should consider using full paths to support any file operations. Otherwise, a "directory aware"
-/// implementation could be achieved with a current directory field and traversal functions, in which case relative paths would be applicable.
+/// 此接口旨在帮助在库中抽象跨平台的文件存储操作，
+/// 但实际行为将由实现者决定。例如，我们不提供当前目录的概念，
+/// 因此实现者应考虑使用完整路径来支持任何文件操作。否则，"目录感知"
+/// 的实现可以通过当前目录字段和遍历函数来实现，在这种情况下相对路径是适用的。
 /// </summary>
 public interface IFileStorageHelper
 {
     /// <summary>
-    /// Retrieves an object from a file.
+    /// 从文件中检索对象。
     /// </summary>
-    /// <typeparam name="T">Type of object retrieved.</typeparam>
-    /// <param name="filePath">Path to the file that contains the object.</param>
-    /// <param name="default">Default value of the object.</param>
-    /// <returns>Waiting task until completion with the object in the file.</returns>
+    /// <typeparam name="T">检索对象的类型。</typeparam>
+    /// <param name="filePath">包含对象的文件路径。</param>
+    /// <param name="default">对象的默认值。</param>
+    /// <returns>完成前的等待任务，包含文件中的对象。</returns>
     Task<T?> ReadFileAsync<T>(string filePath, T? @default = default);
 
     /// <summary>
-    /// Retrieves the listings for a folder and the item types.
+    /// 检索文件夹的列表和项目类型。
     /// </summary>
-    /// <param name="folderPath">The path to the target folder.</param>
-    /// <returns>A list of item types and names in the target folder.</returns>
+    /// <param name="folderPath">目标文件夹的路径。</param>
+    /// <returns>目标文件夹中项目类型和名称的列表。</returns>
     Task<IEnumerable<(DirectoryItemType ItemType, string Name)>> ReadFolderAsync(string folderPath);
 
     /// <summary>
-    /// Saves an object inside a file.
+    /// 在文件中保存对象。
     /// </summary>
-    /// <typeparam name="T">Type of object saved.</typeparam>
-    /// <param name="filePath">Path to the file that will contain the object.</param>
-    /// <param name="value">Object to save.</param>
-    /// <returns>Waiting task until completion.</returns>
+    /// <typeparam name="T">保存对象的类型。</typeparam>
+    /// <param name="filePath">将包含对象的文件路径。</param>
+    /// <param name="value">要保存的对象。</param>
+    /// <returns>完成前的等待任务。</returns>
     Task CreateFileAsync<T>(string filePath, T value);
 
     /// <summary>
-    /// Ensure a folder exists at the folder path specified.
+    /// 确保在指定的文件夹路径存在文件夹。
     /// </summary>
-    /// <param name="folderPath">The path and name of the target folder.</param>
-    /// <returns>Waiting task until completion.</returns>
+    /// <param name="folderPath">目标文件夹的路径和名称。</param>
+    /// <returns>完成前的等待任务。</returns>
     Task CreateFolderAsync(string folderPath);
 
     /// <summary>
-    /// Deletes a file or folder item.
+    /// 删除文件或文件夹项目。
     /// </summary>
-    /// <param name="itemPath">The path to the item for deletion.</param>
-    /// <returns>Waiting task until completion.</returns>
+    /// <param name="itemPath">要删除项目的路径。</param>
+    /// <returns>完成前的等待任务。</returns>
     Task<bool> TryDeleteItemAsync(string itemPath);
 
     /// <summary>
-    /// Rename an item.
+    /// 重命名项目。
     /// </summary>
-    /// <param name="itemPath">The path to the target item.</param>
-    /// <param name="newName">The new nam for the target item.</param>
-    /// <returns>Waiting task until completion.</returns>
+    /// <param name="itemPath">目标项目的路径。</param>
+    /// <param name="newName">目标项目的新名称。</param>
+    /// <returns>完成前的等待任务。</returns>
     Task<bool> TryRenameItemAsync(string itemPath, string newName);
 }

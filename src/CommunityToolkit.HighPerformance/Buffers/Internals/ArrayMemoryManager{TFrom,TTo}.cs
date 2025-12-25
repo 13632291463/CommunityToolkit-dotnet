@@ -12,35 +12,35 @@ using RuntimeHelpers = CommunityToolkit.HighPerformance.Helpers.Internals.Runtim
 namespace CommunityToolkit.HighPerformance.Buffers.Internals;
 
 /// <summary>
-/// A custom <see cref="MemoryManager{T}"/> that casts data from a <typeparamref name="TFrom"/> array, to <typeparamref name="TTo"/> values.
+/// 一个自定义的 <see cref="MemoryManager{T}"/>，将 <typeparamref name="TFrom"/> 数组中的数据转换为 <typeparamref name="TTo"/> 值。
 /// </summary>
-/// <typeparam name="TFrom">The source type of items to read.</typeparam>
-/// <typeparam name="TTo">The target type to cast the source items to.</typeparam>
+/// <typeparam name="TFrom">要读取的源类型项。</typeparam>
+/// <typeparam name="TTo">要将源项转换到的目标类型。</typeparam>
 internal sealed class ArrayMemoryManager<TFrom, TTo> : MemoryManager<TTo>, IMemoryManager
     where TFrom : unmanaged
     where TTo : unmanaged
 {
     /// <summary>
-    /// The source <typeparamref name="TFrom"/> array to read data from.
+    /// 源 <typeparamref name="TFrom"/> 数组，从中读取数据。
     /// </summary>
     private readonly TFrom[] array;
 
     /// <summary>
-    /// The starting offset within <see name="array"/>.
+    /// <see name="array"/> 中的起始偏移量。
     /// </summary>
     private readonly int offset;
 
     /// <summary>
-    /// The original used length for <see name="array"/>.
+    /// <see name="array"/> 的原始使用长度。
     /// </summary>
     private readonly int length;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArrayMemoryManager{TFrom, TTo}"/> class.
+    /// 初始化 <see cref="ArrayMemoryManager{TFrom, TTo}"/> 类的新实例。
     /// </summary>
-    /// <param name="array">The source <typeparamref name="TFrom"/> array to read data from.</param>
-    /// <param name="offset">The starting offset within <paramref name="array"/>.</param>
-    /// <param name="length">The original used length for <paramref name="array"/>.</param>
+    /// <param name="array">源 <typeparamref name="TFrom"/> 数组，从中读取数据。</param>
+    /// <param name="offset"><paramref name="array"/> 中的起始偏移量。</param>
+    /// <param name="length"><paramref name="array"/> 的原始使用长度。</param>
     public ArrayMemoryManager(TFrom[] array, int offset, int length)
     {
         this.array = array;
@@ -48,7 +48,10 @@ internal sealed class ArrayMemoryManager<TFrom, TTo> : MemoryManager<TTo>, IMemo
         this.length = length;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取表示此内存管理器数据的 Span<TTo>。
+    /// </summary>
+    /// <returns>表示此内存管理器数据的 Span<TTo>。</returns>
     public override Span<TTo> GetSpan()
     {
 #if NETSTANDARD2_1_OR_GREATER
@@ -60,14 +63,16 @@ internal sealed class ArrayMemoryManager<TFrom, TTo> : MemoryManager<TTo>, IMemo
 #else
         Span<TFrom> span = this.array.AsSpan(this.offset, this.length);
 
-        // We rely on MemoryMarshal.Cast here to deal with calculating the effective
-        // size of the new span to return. This will also make the behavior consistent
-        // for users that are both using this type as well as casting spans directly.
+        // 我们依赖 MemoryMarshal.Cast 来处理计算新 Span 的有效大小。这也会使使用此类型以及直接转换 Span 的用户具有一致的行为。
         return MemoryMarshal.Cast<TFrom, TTo>(span);
 #endif
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 固定内存中的元素并返回 MemoryHandle。
+    /// </summary>
+    /// <param name="elementIndex">要固定的元素的索引（默认为 0）。</param>
+    /// <returns>表示固定内存的 MemoryHandle。</returns>
     public override unsafe MemoryHandle Pin(int elementIndex = 0)
     {
         if ((uint)elementIndex >= (uint)(this.length * sizeof(TFrom) / sizeof(TTo)))
@@ -89,29 +94,38 @@ internal sealed class ArrayMemoryManager<TFrom, TTo> : MemoryManager<TTo>, IMemo
         return new(pi, handle);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 取消固定先前固定的内存。
+    /// </summary>
     public override void Unpin()
     {
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 释放与此对象关联的资源。
+    /// </summary>
+    /// <param name="disposing">如果为 true，则表示正在显式释放对象；否则为 false。</param>
     protected override void Dispose(bool disposing)
     {
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 获取指定偏移量和长度的 Memory<T> 实例，用于类型转换操作。
+    /// </summary>
+    /// <typeparam name="T">目标类型。</typeparam>
+    /// <param name="offset">偏移量。</param>
+    /// <param name="length">长度。</param>
+    /// <returns>指定偏移量和长度的 Memory<T> 实例。</returns>
     public Memory<T> GetMemory<T>(int offset, int length)
         where T : unmanaged
     {
-        // We need to calculate the right offset and length of the new Memory<T>. The local offset
-        // is the original offset into the wrapped TFrom[] array, while the input offset is the one
-        // with respect to TTo items in the Memory<TTo> instance that is currently being cast.
+        // 我们需要计算新 Memory<T> 的正确偏移量和长度。局部偏移量是包装的 TFrom[] 数组中的原始偏移量，
+        // 而输入偏移量是相对于当前正在转换的 Memory<TTo> 实例中的 TTo 项的偏移量。
         int absoluteOffset = this.offset + RuntimeHelpers.ConvertLength<TTo, TFrom>(offset);
         int absoluteLength = RuntimeHelpers.ConvertLength<TTo, TFrom>(length);
 
-        // We have a special handling in cases where the user is circling back to the original type
-        // of the wrapped array. In this case we can just return a memory wrapping that array directly,
-        // with offset and length being adjusted, without the memory manager indirection.
+        // 当用户回到包装数组的原始类型时，我们需要特殊处理。在这种情况下，我们可以直接返回包装该数组的内存，
+        // 具有调整后的偏移量和长度，而不需要内存管理器间接引用。
         if (typeof(T) == typeof(TFrom))
         {
             return (Memory<T>)(object)this.array.AsMemory(absoluteOffset, absoluteLength);
@@ -121,7 +135,7 @@ internal sealed class ArrayMemoryManager<TFrom, TTo> : MemoryManager<TTo>, IMemo
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentOutOfRangeException"/> when the target index for <see cref="Pin"/> is invalid.
+    /// 当 <see cref="Pin"/> 的目标索引无效时，抛出 <see cref="ArgumentOutOfRangeException"/> 异常。
     /// </summary>
     private static void ThrowArgumentOutOfRangeExceptionForInvalidIndex()
     {

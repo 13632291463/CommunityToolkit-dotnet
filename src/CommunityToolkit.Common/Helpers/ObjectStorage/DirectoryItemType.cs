@@ -5,22 +5,22 @@
 namespace CommunityToolkit.Common.Helpers;
 
 /// <summary>
-/// Represents the types of items available in a directory.
+/// 表示目录中可用的项目类型。
 /// </summary>
 public enum DirectoryItemType
 {
     /// <summary>
-    /// The item is neither a file or a folder.
+    /// 该项目既不是文件也不是文件夹。
     /// </summary>
     None,
 
     /// <summary>
-    /// Represents a file type item.
+    /// 表示文件类型的项目。
     /// </summary>
     File,
 
     /// <summary>
-    /// Represents a folder type item.
+    /// 表示文件夹类型的项目。
     /// </summary>
     Folder
 }

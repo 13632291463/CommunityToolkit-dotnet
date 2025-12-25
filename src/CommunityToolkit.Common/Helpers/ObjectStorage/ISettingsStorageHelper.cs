@@ -5,38 +5,38 @@
 namespace CommunityToolkit.Helpers;
 
 /// <summary>
-/// Service interface used to store data using key value pairs.
+/// 用于使用键值对存储数据的服务接口。
 /// </summary>
-/// <typeparam name="TKey">The type of keys to use for accessing values.</typeparam>
+/// <typeparam name="TKey">用于访问值的键的类型。</typeparam>
 public interface ISettingsStorageHelper<in TKey>
     where TKey : notnull
 {
     /// <summary>
-    /// Retrieves a single item by its key.
+    /// 通过键检索单个项目。
     /// </summary>
-    /// <typeparam name="TValue">Type of object retrieved.</typeparam>
-    /// <param name="key">Key of the object.</param>
-    /// <param name="value">The <see typeparamref="TValue"/> object for <see typeparamref="TKey"/> key.</param>
-    /// <returns>A boolean indicator of success.</returns>
+    /// <typeparam name="TValue">检索对象的类型。</typeparam>
+    /// <param name="key">对象的键。</param>
+    /// <param name="value">对应于键的<see typeparamref="TValue"/>对象。</param>
+    /// <returns>表示操作是否成功的布尔值指示器。</returns>
     bool TryRead<TValue>(TKey key, out TValue? value);
 
     /// <summary>
-    /// Saves a single item by its key.
+    /// 通过键保存单个项目。
     /// </summary>
-    /// <typeparam name="TValue">Type of object saved.</typeparam>
-    /// <param name="key">Key of the value saved.</param>
-    /// <param name="value">Object to save.</param>
+    /// <typeparam name="TValue">保存对象的类型。</typeparam>
+    /// <param name="key">保存值的键。</param>
+    /// <param name="value">要保存的对象。</param>
     void Save<TValue>(TKey key, TValue value);
 
     /// <summary>
-    /// Deletes a single item by its key.
+    /// 通过键删除单个项目。
     /// </summary>
-    /// <param name="key">Key of the object.</param>
-    /// <returns>A boolean indicator of success.</returns>
+    /// <param name="key">对象的键。</param>
+    /// <returns>表示操作是否成功的布尔值指示器。</returns>
     bool TryDelete(TKey key);
 
     /// <summary>
-    /// Clear all keys and values from the settings store.
+    /// 清空设置存储中的所有键和值。
     /// </summary>
     void Clear();
 }

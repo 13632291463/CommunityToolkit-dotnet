@@ -8,17 +8,17 @@ using System.Buffers;
 namespace CommunityToolkit.HighPerformance.Buffers.Internals.Interfaces;
 
 /// <summary>
-/// An interface for a <see cref="MemoryManager{T}"/> instance that can reinterpret its underlying data.
+/// 一个用于 MemoryManager{T} 实例的接口，它可以重新解释其底层数据。
 /// </summary>
 internal interface IMemoryManager
 {
     /// <summary>
-    /// Creates a new <see cref="Memory{T}"/> that reinterprets the underlying data for the current instance.
+    /// 创建一个新的 Memory{T}，它重新解释当前实例的底层数据。
     /// </summary>
-    /// <typeparam name="T">The target type to cast the items to.</typeparam>
-    /// <param name="offset">The starting offset within the data store.</param>
-    /// <param name="length">The original used length for the data store.</param>
-    /// <returns>A new <see cref="Memory{T}"/> instance of the specified type, reinterpreting the current items.</returns>
+    /// <typeparam name="T">要将项转换到的目标类型。</typeparam>
+    /// <param name="offset">数据存储中的起始偏移量。</param>
+    /// <param name="length">数据存储的原始使用长度。</param>
+    /// <returns>一个指定类型的新 Memory{T} 实例，重新解释当前项。</returns>
     Memory<T> GetMemory<T>(int offset, int length)
         where T : unmanaged;
 }
