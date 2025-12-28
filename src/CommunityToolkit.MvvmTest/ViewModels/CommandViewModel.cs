@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -54,12 +54,25 @@ namespace WpfApp.ViewModels
         }
 
         // 异步命令
-        [RelayCommand]
-        private async Task LoadDataAsync()
+        [RelayCommand(CanExecute = nameof(CanSubmit), IncludeCancelCommand = true)]
+        private async Task LoadDataAsync(CancellationToken token)
         {
             Message = "正在加载数据...";
-            await Task.Delay(2000); // 模拟异步操作
-            Message = "数据加载完成";
+            try
+            {
+                await Task.Delay(2000, token); // 模拟异步操作
+                Message = "数据加载完成";
+            }
+            catch (OperationCanceledException ex)
+            {
+                Message = "数据加载已取消";
+                return;
+            }
+        }
+
+        private bool CanSubmit()
+        {
+            return !string.IsNullOrEmpty(Name) && Age > 0;
         }
     }
 }

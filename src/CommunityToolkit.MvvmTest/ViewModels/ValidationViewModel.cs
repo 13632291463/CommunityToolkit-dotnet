@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel.DataAnnotations;
 using System.Windows;
@@ -43,7 +43,7 @@ namespace WpfApp.ViewModels
             {
                 // 显示错误信息
                 //var errors = string.Join("\n", GetErrors().SelectMany(e =>  e.Value).Cast<string>());
-                var errors = string.Join("\n", GetErrors().Select(e=>e.ErrorMessage).Cast<string>());
+                var errors = string.Join("\n", GetErrors().Select(e => e.ErrorMessage).Cast<string>());
                 MessageBox.Show($"存在验证错误:\n{errors}");
             }
             else

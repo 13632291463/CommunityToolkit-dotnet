@@ -1,6 +1,6 @@
 [CommunityToolkit从入门到精通（详细版） - 赵书记 - 博客园](https://www.cnblogs.com/davisdabing/p/18196205)
 
-
+[ObservableObject - Community Toolkits for .NET | Microsoft Learn](https://learn.microsoft.com/zh-cn/dotnet/communitytoolkit/mvvm/observableobject)
 
 ## 异常
 

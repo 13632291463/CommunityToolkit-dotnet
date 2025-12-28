@@ -1,4 +1,4 @@
-﻿<Window x:Class="WpfApp.ValidationWindow"
+<Window x:Class="WpfApp.ValidationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:WpfApp.ViewModels"
@@ -11,7 +11,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
         <!-- 验证错误样式 -->
-        <Style x:Key="ValidationErrorStyle" TargetType="Control">
+        <!--<Style x:Key="ValidationErrorStyle" TargetType="Control">
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
@@ -29,7 +29,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
+        </Style>-->
     </Window.Resources>
 
     <Grid Margin="20">
