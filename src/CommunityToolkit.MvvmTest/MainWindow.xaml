@@ -1,0 +1,39 @@
+﻿<Window x:Class="WpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:WpfApp.ViewModels"
+        Title="CommunityToolkit.Mvvm 基础示例" Height="300" Width="400">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="姓名:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="5" 
+                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <Label Grid.Row="1" Grid.Column="0" Content="年龄:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="5" 
+                 Text="{Binding Age, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0}}"/>
+
+        <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                  Content="启用" Margin="5" 
+                  IsChecked="{Binding IsEnabled}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                   Margin="5,10,5,5" TextWrapping="Wrap"
+                   Text="{Binding Status}"/>
+    </Grid>
+</Window>

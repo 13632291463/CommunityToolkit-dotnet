@@ -1,0 +1,63 @@
+﻿<Window x:Class="WpfApp.CommandWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:WpfApp.ViewModels"
+        xmlns:sys="http://schemas.microsoft.com/winfx/2009/xaml"
+        Title="CommunityToolkit.Mvvm 命令示例"
+        Width="500"
+        Height="400">
+
+    <Window.DataContext>
+        <vm:CommandViewModel />
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Content="姓名:" />
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+        <Button Grid.Row="0" Grid.Column="2" Margin="5" Content="保存" Command="{Binding SaveCommand}" />
+
+        <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Content="年龄:" />
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Text="{Binding Age, UpdateSourceTrigger=PropertyChanged}" />
+
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5" Orientation="Horizontal">
+            <Button Margin="0,0,5,0" Content="设置为25" Command="{Binding UpdateAgeCommand}" CommandParameter="25" />
+            <Button Margin="0,0,5,0" Content="设置为30" Command="{Binding UpdateAgeCommand}" CommandParameter="30" />
+            <Button Content="设置为35" Command="{Binding UpdateAgeCommand}" CommandParameter="35" />
+        </StackPanel>
+
+        <Button Grid.Row="3"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="5"
+                Content="重置"
+                Command="{Binding ResetCommand}" />
+
+        <Button Grid.Row="4"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="5"
+                Content="异步加载数据"
+                Command="{Binding LoadDataCommand}" />
+
+        <TextBlock Grid.Row="5"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="3"
+                   Margin="5,10,5,5"
+                   TextWrapping="Wrap"
+                   Text="{Binding Message}" />
+    </Grid>
+</Window>

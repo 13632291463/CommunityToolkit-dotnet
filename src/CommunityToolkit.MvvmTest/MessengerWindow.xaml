@@ -1,0 +1,40 @@
+﻿<Window x:Class="WpfApp.MessengerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:WpfApp.ViewModels"
+        Title="CommunityToolkit.Mvvm 消息传递示例" Height="300" Width="500">
+
+    <Window.DataContext>
+        <vm:MessengerViewModel />
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="发送消息:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="5" 
+                 Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                Margin="5" Content="发送消息" 
+                Command="{Binding SendMessageCommand}"/>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="接收消息:" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="5" 
+                   Text="{Binding ReceivedMessage}" 
+                   TextWrapping="Wrap"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                   Margin="5,10,5,5" TextWrapping="Wrap"
+                   Text="此示例展示了如何在不同组件间传递消息，而不需要直接引用。"/>
+    </Grid>
+</Window>
