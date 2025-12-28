@@ -77,10 +77,13 @@ partial class IMessengerExtensions
         }
 
         /// <summary>
-        /// Observable{TMessage}的IRecipient{TMessage}实现
+        /// Recipient--收件人
+        /// 一个私有的密封类，实现IRecipient&lt;TMessage&gt;和IDisposable接口
+        /// 用于将IObserver接口适配到IMessenger的消息接收机制
         /// </summary>
+        /// <typeparam name="TMessage">消息的类型</typeparam>
 #if NET8_0_OR_GREATER && WINDOWS
-        [WinRTExposedType(typeof(WinRTManagedOnlyTypeDetails))]
+                [WinRTExposedType(typeof(WinRTManagedOnlyTypeDetails))]
 #endif
         private sealed class Recipient : IRecipient<TMessage>, IDisposable
         {

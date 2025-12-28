@@ -27,6 +27,10 @@ namespace CommunityToolkit.Mvvm.ComponentModel;
 
 /// <summary>
 /// 一个基类，用于需要属性可观察的对象
+/// ObservableObject 除了实现了 INotifyPropertyChanged 接口之外，还提供了一些方法来帮助我们实现通知功能。
+///  - OnPropertyChanged（拥有两个方法重载）
+///  - SetProperty（包含六个方法重载）
+///  - SetPropertyAndNotifyOnCompletion（包含五个重载，用于 TaskNotifier）
 /// </summary>
 public abstract class ObservableObject : INotifyPropertyChanged, INotifyPropertyChanging
 {
